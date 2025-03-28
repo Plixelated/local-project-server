@@ -22,5 +22,5 @@ public partial class Entry
 
     [InverseProperty("Entry")]
     public virtual ICollection<Values> SubmittedValues { get; set; } = new List<Values>();
-
+    
 }
