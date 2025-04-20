@@ -13,6 +13,7 @@ public partial class Values
     [Key]
     [Column("submission_id")]
     public int SubmissionID { get; set; }
+    //Change to string to use UUID
 
     //FORMULA VARIABLES
     //Star Formation Rate

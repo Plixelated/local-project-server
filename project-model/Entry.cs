@@ -10,10 +10,12 @@ namespace project_model;
 [Table("Entry")]
 public partial class Entry
 {
+    //Change to string for UUID
     [Key]
     [Column("id")]
     public int ID { get; set; }
 
+    //Give some kind of token
     [Column("origin")]
     [StringLength(255)]
     [Unicode(false)]
