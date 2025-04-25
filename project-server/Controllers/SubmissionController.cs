@@ -23,6 +23,7 @@ namespace project_server.Controllers
         [HttpPost]
         public async Task<ActionResult<Values>> PostSubmission(Values submission)
         {
+            Console.Write(submission.ToString());
             _context.SubmittedValues.Add(submission);
             await _context.SaveChangesAsync();
 

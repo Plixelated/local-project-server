@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using project_model;
 
 namespace project_model;
 
-public class ModelContext : DbContext
+public class ModelContext : IdentityDbContext<ProjectUser>
 {
+    public ModelContext() { }
+    public ModelContext(DbContextOptions<ModelContext> options):base(options) { }
+
     public DbSet<Entry> Entries { get; set; }
     public DbSet<Values> SubmittedValues { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=project_user;Database=submissions");
