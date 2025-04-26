@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace project_server.Dtos
 {
-    public class Submission
+    public class ValuesDTO
     {
         public int Id { get; set; }
         public decimal RateStars {  get; set; }
@@ -14,5 +14,8 @@ namespace project_server.Dtos
         public decimal FractionIntelligence { get; set; }
         public decimal FractionCommunication { get; set; }
         public long Length { get; set; }
+
+        //Entry Info
+        public string EntryOrigin {  get; set; }
     }
 }

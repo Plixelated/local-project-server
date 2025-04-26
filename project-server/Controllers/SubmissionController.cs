@@ -21,14 +21,67 @@ namespace project_server.Controllers
         //https://go.microsoft.com/fwlink/?linkid=2123754
 
         [HttpPost]
-        public async Task<ActionResult<Values>> PostSubmission(Values submission)
+        public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
-            Console.Write(submission.ToString());
-            _context.SubmittedValues.Add(submission);
+
+            var origin = Guid.NewGuid().ToString();
+
+            var newEntry = new Entry
+            {
+                Origin = origin,
+                SubmittedValues = new List<Values>
+                {
+                    new Values
+                    {
+                        RateStars = valuesDto.RateStars,
+                        FrequencyPlanets = valuesDto.FrequencyPlanets,
+                        NearEarth = valuesDto.NearEarth,
+                        FractionLife = valuesDto.FractionLife,
+                        FractionIntelligence = valuesDto.FractionIntelligence,
+                        FractionCommunication = valuesDto.FractionCommunication,
+                        Length = valuesDto.Length
+                    }
+                }
+            };
+
+
+            _context.Entries.Add(newEntry);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSubmission", new {id = submission.SubmissionID}, submission);
+            return Ok(new
+            {
+                message = "Submission saved.",
+                origin = newEntry.Origin
+            });
+        }
 
+        [HttpPut]
+        public async Task<ActionResult<Values>> AddNewSubmission([FromBody] ValuesDTO valuesDto)
+        {
+            //Check if entry exists with current origin
+            var existingEntry = await _context.Entries
+                .Include(e => e.SubmittedValues)
+                .FirstOrDefaultAsync(e => e.Origin == valuesDto.EntryOrigin);
+
+            if (existingEntry == null)
+            {
+                return NotFound("No matching entry found");
+            }
+
+            var newSubmission = new Values
+            {
+                RateStars = valuesDto.RateStars,
+                FrequencyPlanets = valuesDto.FrequencyPlanets,
+                NearEarth = valuesDto.NearEarth,
+                FractionLife = valuesDto.FractionLife,
+                FractionIntelligence = valuesDto.FractionIntelligence,
+                FractionCommunication = valuesDto.FractionCommunication,
+                Length = valuesDto.Length
+            };
+
+            existingEntry?.SubmittedValues.Add(newSubmission);
+            await _context.SaveChangesAsync();
+            return Ok("Sumbission Added Succesfully");
         }
 
         [HttpGet]
