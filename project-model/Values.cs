@@ -45,7 +45,11 @@ public partial class Values
     public long Length { get; set; }
 
     //FOREIGN KEY
-    [ForeignKey("EntryOrigin")]
+    [ForeignKey("entry_origin")]
+    [StringLength(255)]
+    [Unicode(false)]
+    public string EntryOrigin { get; set; } = string.Empty;
+
     [InverseProperty("SubmittedValues")]
     public virtual Entry Entry { get; set; } = null;
 }

@@ -7,7 +7,7 @@ using project_model;
 
 namespace project_model;
 
-public class ModelContext : IdentityDbContext<ProjectUser>
+public class ModelContext : DbContext
 {
     public ModelContext() { }
     public ModelContext(DbContextOptions<ModelContext> options):base(options) { }
@@ -32,6 +32,8 @@ public class ModelContext : IdentityDbContext<ProjectUser>
         {
             entity.HasOne(e => e.Entry) //Parent Entity
             .WithMany(p => p.SubmittedValues) //One to Many
+            .HasForeignKey(v => v.EntryOrigin) //Explicitly states FK
+            .HasPrincipalKey(e => e.Origin) //Use origin for FK even though its not the PK of entry
             .OnDelete(DeleteBehavior.Cascade) //Maybe not cascade? Decide Later
             .HasConstraintName("FK_Entry_Submission");
 
@@ -46,7 +48,6 @@ public class ModelContext : IdentityDbContext<ProjectUser>
             entity.ToTable(t => t.HasCheckConstraint("CK_NonNegative_FractionIntelligence_Values_Only", "f_i >= 0"));
             entity.ToTable(t => t.HasCheckConstraint("CK_NonNegative_FractionCommunication_Values_Only", "f_c >= 0"));
             entity.ToTable(t => t.HasCheckConstraint("CK_NonNegative_Length_Values_Only", "l >= 0"));
-
 
         });
     }
