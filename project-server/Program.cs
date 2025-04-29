@@ -26,8 +26,13 @@ if (string.IsNullOrEmpty(_connectionString))
 
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddDbContext<ModelContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ModelContext>(options => {
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .EnableSensitiveDataLogging()
+    .LogTo(Console.WriteLine, LogLevel.Information)
+    ;
+    
+    });
 
 Console.WriteLine("Loaded connection string: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
@@ -41,12 +46,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(options =>
-{
-    options.AllowAnyHeader();
-    options.AllowAnyMethod();
-    options.AllowAnyOrigin();
-});
+app.UseCors(option => option.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseHttpsRedirection();
 

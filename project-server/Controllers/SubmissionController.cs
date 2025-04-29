@@ -20,15 +20,13 @@ namespace project_server.Controllers
 
         //https://go.microsoft.com/fwlink/?linkid=2123754
 
-        [HttpPost]
+        [HttpPost("CreateEntry")]
         public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
 
-            var origin = Guid.NewGuid().ToString();
-
             var newEntry = new Entry
             {
-                Origin = origin,
+                Origin = valuesDto.EntryOrigin,
                 SubmittedValues = new List<Values>
                 {
                     new Values
@@ -55,7 +53,7 @@ namespace project_server.Controllers
             });
         }
 
-        [HttpPut]
+        [HttpPost("CreateSubmission")]
         public async Task<ActionResult<Values>> AddNewSubmission([FromBody] ValuesDTO valuesDto)
         {
             //Check if entry exists with current origin
@@ -65,7 +63,7 @@ namespace project_server.Controllers
 
             if (existingEntry == null)
             {
-                return NotFound("No matching entry found");
+                await CreateEntry(valuesDto);
             }
 
             var newSubmission = new Values
@@ -76,7 +74,9 @@ namespace project_server.Controllers
                 FractionLife = valuesDto.FractionLife,
                 FractionIntelligence = valuesDto.FractionIntelligence,
                 FractionCommunication = valuesDto.FractionCommunication,
-                Length = valuesDto.Length
+                Length = valuesDto.Length,
+                EntryOrigin = valuesDto.EntryOrigin
+                
             };
 
             existingEntry?.SubmittedValues.Add(newSubmission);
@@ -84,7 +84,7 @@ namespace project_server.Controllers
             return Ok("Sumbission Added Succesfully");
         }
 
-        [HttpGet]
+        [HttpGet("GetAllValues")]
         public async Task<ActionResult<IEnumerable<Values>>> GetSubmissions()
         {
             return await _context.SubmittedValues.Take(100).ToListAsync();

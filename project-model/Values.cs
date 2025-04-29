@@ -17,27 +17,27 @@ public partial class Values
 
     //FORMULA VARIABLES
     //Star Formation Rate
-    [Column("r_s",TypeName = "decimal(3,2)")]
+    [Column("r_s",TypeName = "decimal(5,2)")]
     public decimal RateStars {  get; set; }
 
     //% that planets will form
-    [Column("f_p", TypeName = "decimal(3,2)")]
+    [Column("f_p", TypeName = "decimal(5,2)")]
     public decimal FrequencyPlanets { get; set; }
 
     //% of planets that support life
-    [Column("n_e", TypeName = "decimal(3,2)")]
+    [Column("n_e", TypeName = "decimal(5,2)")]
     public short NearEarth { get; set; }
 
     //% planets that develop life
-    [Column("f_l", TypeName = "decimal(3,2)")]
+    [Column("f_l", TypeName = "decimal(5,2)")]
     public decimal FractionLife { get; set; }
 
     //% planets that develop intelligent life
-    [Column("f_i", TypeName = "decimal(3,2)")]
+    [Column("f_i", TypeName = "decimal(5,2)")]
     public decimal FractionIntelligence { get; set; }
 
     //% of planets that develop detectable technology
-    [Column("f_c", TypeName = "decimal(3,2)")]
+    [Column("f_c", TypeName = "decimal(5,2)")]
     public decimal FractionCommunication { get; set;}
 
     //length of time they release detectable information
@@ -48,7 +48,7 @@ public partial class Values
     [ForeignKey("entry_origin")]
     [StringLength(255)]
     [Unicode(false)]
-    public string EntryOrigin { get; set; } = string.Empty;
+    public string EntryOrigin { get; set; }
 
     [InverseProperty("SubmittedValues")]
     public virtual Entry Entry { get; set; } = null;
