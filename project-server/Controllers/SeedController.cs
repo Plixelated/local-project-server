@@ -15,9 +15,7 @@ namespace project_server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class SeedController(
-        ModelContext context, 
-        UserManager<ProjectUser> userManager, 
-        RoleManager<IdentityRole> roleManager
+        ModelContext context, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
         [HttpPost("Users")]

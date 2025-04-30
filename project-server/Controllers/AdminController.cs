@@ -10,7 +10,9 @@ namespace project_server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController(UserManager<ProjectUser> userManager, JWTHandler jwtHandler) : ControllerBase
+    public class AdminController(
+        UserManager<ProjectUser> userManager, JWTHandler jwtHandler, RoleManager<IdentityRole> roleManager
+        ) : ControllerBase
     {
         [HttpPost("Login")]
         public async Task<ActionResult> LoginAsync(Dtos.LoginRequest request)
@@ -34,6 +36,30 @@ namespace project_server.Controllers
                 Message = "Login Succesful",
                 Token = tokenString,
             });
+        }
+
+        [HttpPost("Register")]
+        public async Task<ActionResult> RegisterAsync(Dtos.RegisterRequest request)
+        {
+            ProjectUser user = new()
+            {
+                UserName = request.UserName,
+                Email = request.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+            };
+
+            IdentityResult userResults = await userManager.CreateAsync(user, request.Password);
+
+            if (!userResults.Succeeded)
+                return BadRequest(userResults.Errors);
+
+            bool userRole = await roleManager.RoleExistsAsync("User");
+            if (!userRole)
+                await roleManager.CreateAsync(new IdentityRole("User"));
+
+            await userManager.AddToRoleAsync(user, "User");
+
+            return Ok($"User {request.UserName} created succesfully.");
         }
     }
 }
