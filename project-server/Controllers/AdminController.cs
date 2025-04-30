@@ -61,5 +61,29 @@ namespace project_server.Controllers
 
             return Ok($"User {request.UserName} created succesfully.");
         }
+
+        [HttpPost("RegisterAdmin")]
+        public async Task<ActionResult> RegisterAdminAsync(Dtos.RegisterRequest request)
+        {
+            ProjectUser user = new()
+            {
+                UserName = request.UserName,
+                Email = request.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+            };
+
+            IdentityResult userResults = await userManager.CreateAsync(user, request.Password);
+
+            if (!userResults.Succeeded)
+                return BadRequest(userResults.Errors);
+
+            bool userRole = await roleManager.RoleExistsAsync("Admin");
+            if (!userRole)
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+            await userManager.AddToRoleAsync(user, "Admin");
+
+            return Ok($"Admin {request.UserName} created succesfully.");
+        }
     }
 }
