@@ -18,12 +18,12 @@ namespace project_server.Controllers
             ProjectUser user = await userManager.FindByNameAsync(request.UserName);
 
             if (user == null)
-                return Unauthorized("Who even are you?");
+                return Unauthorized("Incorrect Login Information");
 
             bool success = await userManager.CheckPasswordAsync(user, request.Password);
 
             if (!success)
-                return Unauthorized("You don't know your password?");
+                return Unauthorized("Incorrect Login Information");
 
             JwtSecurityToken token = await jwtHandler.GetTokenAsync(user);
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
@@ -31,7 +31,7 @@ namespace project_server.Controllers
             return Ok(new LoginResponse
             {
                 Success = true,
-                Message = "Other Mother loves you too",
+                Message = "Login Succesful",
                 Token = tokenString,
             });
         }
