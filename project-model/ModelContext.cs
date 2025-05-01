@@ -1,26 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
-using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+using DotNetEnv.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using project_model;
 
 namespace project_model;
 
-public class ModelContext : DbContext
+public class ModelContext : IdentityDbContext<ProjectUser>
 {
     public ModelContext() { }
-    public ModelContext(DbContextOptions<ModelContext> options):base(options) { }
+    public ModelContext(DbContextOptions<ModelContext> options) : base(options) { }
 
     public DbSet<Entry> Entries { get; set; }
     public DbSet<Values> SubmittedValues { get; set; }
 
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=project_user;Database=submissions");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+        //optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=project_user;Database=submissions");
+        if (optionsBuilder.IsConfigured)
+        {
+            return;
+        }
+
+        //Load ENV
+        DotNetEnv.Env.Load();
+        var _connectionString = Environment.GetEnvironmentVariable("ConnectionStrings_DefaultConnection");
+        if (string.IsNullOrEmpty(_connectionString))
+        {
+            throw new Exception("Connection String Not Found in .env file");
+        }
+
+/*        IConfigurationBuilder builder = new ConfigurationBuilder().AddEnvironmentVariables();
+        IConfigurationRoot configuration = builder.Build();*/
+
+        optionsBuilder.UseNpgsql(_connectionString);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Entry>(entity =>
         {
              entity.Property(e => e.ID)

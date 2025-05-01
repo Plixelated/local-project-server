@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +84,7 @@ namespace project_server.Controllers
             await _context.SaveChangesAsync();
             return Ok("Sumbission Added Succesfully");
         }
-
+        [Authorize(Roles ="Admin")]
         [HttpGet("GetAllValues")]
         public async Task<ActionResult<IEnumerable<Values>>> GetSubmissions()
         {
