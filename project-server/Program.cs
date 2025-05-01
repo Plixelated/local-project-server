@@ -135,7 +135,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(option => 
-option.WithOrigins("https://local-project-client.vercel.app")
+option.WithOrigins("https://plixel.app")
 .AllowAnyHeader()
 .AllowCredentials()
 .AllowAnyMethod()
