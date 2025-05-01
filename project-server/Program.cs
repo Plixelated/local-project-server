@@ -107,6 +107,19 @@ builder.Services.AddAuthentication(options =>
             ) ?? throw new InvalidOperationException()
     };
 
+    //HTTP ONLY COOKIE
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Read token from cookie instead of Authorization header
+            var token = context.Request.Cookies["jwt"];
+            if (!string.IsNullOrEmpty(token))
+                context.Token = token;
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 //Scoped Dependency Injection of JWT Handler
@@ -121,7 +134,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(option => option.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.UseCors(option => 
+option.WithOrigins("http://localhost:4200")
+.AllowAnyHeader()
+.AllowCredentials()
+.AllowAnyMethod()
+);
 
 app.UseHttpsRedirection();
 

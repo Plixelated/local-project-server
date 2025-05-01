@@ -30,11 +30,24 @@ namespace project_server.Controllers
             JwtSecurityToken token = await jwtHandler.GetTokenAsync(user);
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
+            //HTTP ONLY COOKIE
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = token.ValidTo,
+                SameSite = SameSiteMode.Strict,
+                Secure = true
+            };
+
+            Response.Cookies.Append("jwt", tokenString, cookieOptions);
+            var refreshToken = Request.Cookies["jwt"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest(new { Message = "Invalid Token" });
+
             return Ok(new LoginResponse
             {
                 Success = true,
                 Message = "Login Succesful",
-                Token = tokenString,
             });
         }
 
