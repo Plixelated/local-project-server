@@ -135,7 +135,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(option => 
-option.WithOrigins("https://plixel.app")
+option.WithOrigins("https://stars.plixel.app")
 .AllowAnyHeader()
 .AllowCredentials()
 .AllowAnyMethod()
