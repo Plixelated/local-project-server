@@ -1,0 +1,30 @@
+name: Deploy ASP.NET Core to Droplet
+
+on:
+  push:
+    branches:
+      - main  # or your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Droplet
+      run: |
+        ssh ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
+          cd /var/www/myapp
+          git pull origin main
+          dotnet publish -c Release -o /var/www/myapp-publish
+          systemctl restart myapp
+        EOF
