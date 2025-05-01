@@ -51,6 +51,13 @@ namespace project_server.Controllers
             });
         }
 
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("jwt");
+            return Ok(new { message = "Logged Out" });
+        }
+
         [HttpPost("Register")]
         public async Task<ActionResult> RegisterAsync(Dtos.RegisterRequest request)
         {
