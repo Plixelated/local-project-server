@@ -135,7 +135,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(option => 
-option.WithOrigins("http://localhost:4200")
+option.WithOrigins("https://local-project-client.vercel.app")
 .AllowAnyHeader()
 .AllowCredentials()
 .AllowAnyMethod()
