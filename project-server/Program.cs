@@ -124,6 +124,7 @@ builder.Services.AddAuthentication(options =>
 
 //Scoped Dependency Injection of JWT Handler
 builder.Services.AddScoped<JWTHandler>();
+builder.Services.AddScoped<DataAnalysisService>();
 
 var app = builder.Build();
 
