@@ -15,10 +15,10 @@ namespace project_server.Controllers
         private readonly DataAnalysisService _analysisService = analysisService;
 
         //[Authorize(Roles = "Admin")]
-        [HttpGet("GetAllValues")]
-        public async Task<ActionResult<IEnumerable<Values>>> GetAllSubmissions()
+        [HttpGet("GetRawData")]
+        public async Task<ActionResult<IEnumerable<Values>>> GetRawData()
         {
-            //return await _context.SubmittedValues.Take(100).ToListAsync();
+
             var retrievedEntries = await _context.SubmittedValues.ToListAsync();
             return retrievedEntries;
         }
@@ -37,8 +37,8 @@ namespace project_server.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpPost("FilterDataset")] //use a Json with filters for this
-        public async Task<ActionResult<Values>> FilterData(Dtos.DataFilterDTO filters)
+        [HttpPost("GetDataset")] //use a Json with filters for this
+        public async Task<ActionResult<Values>> GetDataset(Dtos.DataFilterDTO filters)
         {
             //Handle request for all data with a seprate API call
             var data = await _context.SubmittedValues.ToListAsync();
