@@ -79,7 +79,11 @@ namespace project_server.Controllers
 
             await userManager.AddToRoleAsync(user, "User");
 
-            return Ok($"User {request.UserName} created succesfully.");
+            return Ok(new
+            {
+                Success = true,
+                Message = $"User {request.UserName} created succesfully.",
+            });
         }
 
         [HttpPost("RegisterAdmin")]
@@ -103,7 +107,11 @@ namespace project_server.Controllers
 
             await userManager.AddToRoleAsync(user, "Admin");
 
-            return Ok($"Admin {request.UserName} created succesfully.");
+            return Ok(new
+            {
+                Success = true,
+                Message = $"Admin {request.UserName} created succesfully.",
+            });
         }
     }
 }

@@ -19,8 +19,6 @@ namespace project_server.Controllers
         //submission is handling these values
         private readonly ModelContext _context = context;
 
-        //https://go.microsoft.com/fwlink/?linkid=2123754
-
         [HttpPost("CreateEntry")]
         public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
@@ -84,26 +82,7 @@ namespace project_server.Controllers
             await _context.SaveChangesAsync();
             return Ok("Sumbission Added Succesfully");
         }
-        [Authorize(Roles ="Admin")]
-        [HttpGet("GetAllValues")]
-        public async Task<ActionResult<IEnumerable<Values>>> GetSubmissions()
-        {
-            return await _context.SubmittedValues.Take(100).ToListAsync();
-        }
 
 
-        // GET: api/Cities/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Values>> GetSubmission(int id)
-        {
-            var submission = await _context.SubmittedValues.FindAsync(id);
-
-            if (submission == null)
-            {
-                return NotFound();
-            }
-
-            return submission;
-        }
     }
 }
