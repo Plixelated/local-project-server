@@ -37,13 +37,24 @@ namespace project_server.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpPost("GetDataset")] //use a Json with filters for this
-        public async Task<ActionResult<Values>> GetDataset(Dtos.DataFilterDTO filters)
+        [HttpPost("GetFlatDataset")] //use a Json with filters for this
+        public async Task<ActionResult<Values>> GetFlatDataset(Dtos.DataFilterDTO filters)
         {
-            //Handle request for all data with a seprate API call
-            var data = await _context.SubmittedValues.ToListAsync();
-            var dataset = _analysisService.FilterDataSet(data, filters.VariableFilter);
-            var results = _analysisService.PerformOperation(dataset, filters.OperationFilter);
+            List<Values> data = await _context.SubmittedValues.ToListAsync();
+            List<FilteredData> dataset = _analysisService.FilterDataSet(data, filters.VariableFilter);
+            FlatData results = _analysisService.FlattenData(dataset, filters.OperationFilter);
+
+            return Ok(results);
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("GetFilteredDataset")] //use a Json with filters for this
+        public async Task<ActionResult<Values>> GetFilteredDataset(Dtos.DataFilterDTO filters)
+        {
+
+            List<Values> data = await _context.SubmittedValues.ToListAsync();
+            List<FilteredData> dataset = _analysisService.FilterDataSet(data, filters.VariableFilter);
+            List<AggregateData> results = _analysisService.PerformOperation(dataset, filters.OperationFilter);
 
             return Ok(results);
         }
