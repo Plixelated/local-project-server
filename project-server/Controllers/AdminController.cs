@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
@@ -86,6 +87,7 @@ namespace project_server.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("RegisterAdmin")]
         public async Task<ActionResult> RegisterAdminAsync(Dtos.RegisterRequest request)
         {

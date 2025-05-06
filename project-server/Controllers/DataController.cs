@@ -19,7 +19,7 @@ namespace project_server.Controllers
         private readonly ModelContext _context = context;
         private readonly DataAnalysisService _analysisService = analysisService;
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetRawData")]
         public async Task<ActionResult<IEnumerable<Values>>> GetRawData()
         {
@@ -41,7 +41,7 @@ namespace project_server.Controllers
             return submission;
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("GetFlatDataset")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetFlatDataset(Dtos.DataFilterDTO filters)
         {
@@ -52,7 +52,7 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("GetFilteredDataset")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetFilteredDataset(Dtos.DataFilterDTO filters)
         {
@@ -64,7 +64,7 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("GetAllData")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
         {

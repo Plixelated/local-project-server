@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ namespace project_server.Controllers
         ModelContext context, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
+        [Authorize(Roles = "Admin")]
         [HttpPost("Users")]
         public async Task ImportUsersAsync()
         {
@@ -38,6 +40,7 @@ namespace project_server.Controllers
             int save = await context.SaveChangesAsync();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("Admin")]
         public async Task<ActionResult> ImportAdminAsync()
         {
@@ -63,6 +66,7 @@ namespace project_server.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("roles")]
         public async Task<ActionResult> SeedRoles()
         {
@@ -81,6 +85,7 @@ namespace project_server.Controllers
             return Ok("Roles Created");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("assign-admin/{email}")]
         public async Task<ActionResult> AssignAdminRole(string email)
         {
@@ -101,6 +106,7 @@ namespace project_server.Controllers
             return Ok($"User {email} elevated to Admin role.");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("RandomData")]
         public async Task<ActionResult> SeedRandomData()
         {
