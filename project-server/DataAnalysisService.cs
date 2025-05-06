@@ -80,7 +80,7 @@ public class DataAnalysisService
             "all" => data.SelectMany(v => new List<FilteredData>
             {
                 new FilteredData { Value = v.RateStars, OriginID = v.EntryOrigin, Field = "r_s"},
-                new FilteredData { Value = v.FrequencyPlanets, OriginID = v.EntryOrigin, Field = "f_P" },
+                new FilteredData { Value = v.FrequencyPlanets, OriginID = v.EntryOrigin, Field = "f_p" },
                 new FilteredData { Value = Convert.ToDecimal(v.NearEarth), OriginID = v.EntryOrigin, Field = "n_e" },
                 new FilteredData { Value = v.FractionLife, OriginID = v.EntryOrigin, Field = "f_l" },
                 new FilteredData { Value = v.FractionIntelligence, OriginID = v.EntryOrigin, Field = "f_i" },

@@ -2,8 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using project_model;
 using project_server.Dtos;
+using System.Collections.Generic;
+using System.Data;
+using System.Security.Cryptography.X509Certificates;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace project_server.Controllers
 {
@@ -57,6 +62,31 @@ namespace project_server.Controllers
             List<AggregateData> results = _analysisService.PerformOperation(dataset, filters.OperationFilter);
 
             return Ok(results);
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("GetAllData")] //use a Json with filters for this
+        public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
+        {
+            if (filters.VariableFilter.ToLower() == "all")
+            {
+                string[] variables = ["r_s", "f_p", "n_e", "f_l", "f_i", "f_c", "l"];
+
+                List<System.Object> values = new List<System.Object>();
+
+                List<Values> data = await _context.SubmittedValues.ToListAsync();
+
+                foreach (var variable in variables)
+                {
+                    List<FilteredData> filteredData = _analysisService.FilterDataSet(data, variable);
+                    List<AggregateData> aggData = _analysisService.PerformOperation(filteredData, filters.OperationFilter);
+                    values.Add(aggData);
+                }
+
+
+                return Ok(values);
+            }
+            else{ return BadRequest("Invalid Options"); }
         }
     }
 }

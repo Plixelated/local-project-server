@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using project_model;
+using project_server.Dtos;
 
 namespace project_server.Controllers
 {
@@ -98,6 +99,39 @@ namespace project_server.Controllers
             }
 
             return Ok($"User {email} elevated to Admin role.");
+        }
+
+        [HttpPost("RandomData")]
+        public async Task<ActionResult> SeedRandomData()
+        {
+            for (int i = 0; i < 100; i++) {
+                Random random = new Random();
+                var newEntry = new Entry
+                {
+                    Origin = Guid.NewGuid().ToString(),
+                    SubmittedValues = new List<Values>
+                {
+                    new Values
+                    {
+                        RateStars = (decimal)(random.NextDouble() * (3-0.1) + 0.1),
+                        FrequencyPlanets = (decimal)(random.NextDouble() * (100-1) + 1),
+                        NearEarth = (short)random.Next(1,10),
+                        FractionLife = (decimal)(random.NextDouble() * (100-1) + 1),
+                        FractionIntelligence = (decimal)(random.NextDouble() * (100-1) + 1),
+                        FractionCommunication = (decimal)(random.NextDouble() * (100-1) + 1),
+                        Length = (long)random.NextInt64(1,10000000000),
+                    }
+                }
+                };
+
+                context.Entries.Add(newEntry);
+                await context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                message = "Data Seeded."
+            });
         }
     }
 }
