@@ -73,5 +73,16 @@ public class ModelContext : IdentityDbContext<ProjectUser>
             entity.ToTable(t => t.HasCheckConstraint("CK_NonNegative_Length_Values_Only", "l >= 0"));
 
         });
+
+        //Need to build entity later
+/*        modelBuilder.Entity<UserOrigin>(entity =>
+        {
+            entity.HasKey(uo => new { uo.UserId, uo.EntryOrigin });
+            entity.HasOne(uo => uo.User)
+            .WithOne(u => u.UserOrigin)
+            .HasForeignKey<UserOrigin>(uo => uo.UserId);
+
+
+        });*/
     }
 }

@@ -124,18 +124,26 @@ builder.Services.AddAuthentication(options =>
 
 //Scoped Dependency Injection of JWT Handler
 builder.Services.AddScoped<JWTHandler>();
+builder.Services.AddScoped<DataAnalysisService>();
 
 var app = builder.Build();
+
+string corsOrigin = string.Empty;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    corsOrigin = "http://localhost:4200";
+}
+else
+{
+    corsOrigin = "https://stars.plixel.app";
 }
 
 app.UseCors(option => 
-option.WithOrigins("https://stars.plixel.app")
+option.WithOrigins(corsOrigin)
 .AllowAnyHeader()
 .AllowCredentials()
 .AllowAnyMethod()

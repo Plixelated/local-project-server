@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
@@ -79,9 +80,14 @@ namespace project_server.Controllers
 
             await userManager.AddToRoleAsync(user, "User");
 
-            return Ok($"User {request.UserName} created succesfully.");
+            return Ok(new
+            {
+                Success = true,
+                Message = $"User {request.UserName} created succesfully.",
+            });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("RegisterAdmin")]
         public async Task<ActionResult> RegisterAdminAsync(Dtos.RegisterRequest request)
         {
@@ -103,7 +109,11 @@ namespace project_server.Controllers
 
             await userManager.AddToRoleAsync(user, "Admin");
 
-            return Ok($"Admin {request.UserName} created succesfully.");
+            return Ok(new
+            {
+                Success = true,
+                Message = $"Admin {request.UserName} created succesfully.",
+            });
         }
     }
 }

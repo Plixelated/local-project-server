@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using project_model;
+using project_server.Dtos;
 
 namespace project_server.Controllers
 {
@@ -18,6 +20,7 @@ namespace project_server.Controllers
         ModelContext context, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
+        [Authorize(Roles = "Admin")]
         [HttpPost("Users")]
         public async Task ImportUsersAsync()
         {
@@ -37,6 +40,7 @@ namespace project_server.Controllers
             int save = await context.SaveChangesAsync();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("Admin")]
         public async Task<ActionResult> ImportAdminAsync()
         {
@@ -62,6 +66,7 @@ namespace project_server.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("roles")]
         public async Task<ActionResult> SeedRoles()
         {
@@ -80,6 +85,7 @@ namespace project_server.Controllers
             return Ok("Roles Created");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("assign-admin/{email}")]
         public async Task<ActionResult> AssignAdminRole(string email)
         {
@@ -98,6 +104,40 @@ namespace project_server.Controllers
             }
 
             return Ok($"User {email} elevated to Admin role.");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("RandomData")]
+        public async Task<ActionResult> SeedRandomData()
+        {
+            for (int i = 0; i < 100; i++) {
+                Random random = new Random();
+                var newEntry = new Entry
+                {
+                    Origin = Guid.NewGuid().ToString(),
+                    SubmittedValues = new List<Values>
+                {
+                    new Values
+                    {
+                        RateStars = (decimal)(random.NextDouble() * (3-0.1) + 0.1),
+                        FrequencyPlanets = (decimal)(random.NextDouble() * (100-1) + 1),
+                        NearEarth = (short)random.Next(1,10),
+                        FractionLife = (decimal)(random.NextDouble() * (100-1) + 1),
+                        FractionIntelligence = (decimal)(random.NextDouble() * (100-1) + 1),
+                        FractionCommunication = (decimal)(random.NextDouble() * (100-1) + 1),
+                        Length = (long)random.NextInt64(1,10000000000),
+                    }
+                }
+                };
+
+                context.Entries.Add(newEntry);
+                await context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                message = "Data Seeded."
+            });
         }
     }
 }
