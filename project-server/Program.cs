@@ -142,10 +142,8 @@ else
     corsOrigin = "https://stars.plixel.app";
 }
 
-Console.WriteLine(corsOrigin);
-
 app.UseCors(option => 
-option.WithOrigins(corsOrigin)
+option.WithOrigins("https://stars.plixel.app")
 .AllowAnyHeader()
 .AllowCredentials()
 .AllowAnyMethod()
