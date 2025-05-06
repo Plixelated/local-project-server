@@ -142,6 +142,8 @@ else
     corsOrigin = "https://stars.plixel.app";
 }
 
+Console.WriteLine(corsOrigin);
+
 app.UseCors(option => 
 option.WithOrigins(corsOrigin)
 .AllowAnyHeader()
