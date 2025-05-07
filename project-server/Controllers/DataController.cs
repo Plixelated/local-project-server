@@ -13,23 +13,40 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace project_server.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Policy = "ViewUserData")]
     [ApiController]
     public class DataController(ModelContext context, DataAnalysisService analysisService) : ControllerBase
     {
         private readonly ModelContext _context = context;
         private readonly DataAnalysisService _analysisService = analysisService;
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("GetRawData")]
-        public async Task<ActionResult<IEnumerable<Values>>> GetRawData()
+        public async Task<ActionResult<IEnumerable<EntryDTO>>> GetRawData()
         {
 
-            var retrievedEntries = await _context.SubmittedValues.ToListAsync();
-            return retrievedEntries;
+            var entries = await _context.SubmittedValues.ToListAsync();
+            var groupedData = entries
+                .GroupBy(e => e.EntryOrigin)
+                .Select(g => new EntryDTO
+                {
+                    OriginID = g.Key,
+                    SubmittedValues = g.Select(v => new GroupedDataDTO
+                  {
+                      Id = v.SubmissionID,
+                      r_s = v.RateStars,
+                      f_p = v.FrequencyPlanets,
+                      n_e = v.NearEarth,
+                      f_l = v.FractionLife,
+                      f_i = v.FractionIntelligence,
+                      f_c = v.FractionCommunication,
+                      l = v.Length
+                  }).ToList()
+            }).ToList();
+                
+            return groupedData;
         }
 
 
-        [Authorize(Roles = "Admin,User")]
         [HttpGet("{origin}")]
         public async Task<ActionResult<Values>> GetUserSubmissions(string origin)
         {
@@ -41,7 +58,6 @@ namespace project_server.Controllers
             return submission;
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("GetFlatDataset")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetFlatDataset(Dtos.DataFilterDTO filters)
         {
@@ -52,7 +68,6 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("GetFilteredDataset")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetFilteredDataset(Dtos.DataFilterDTO filters)
         {
@@ -64,7 +79,6 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("GetAllData")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
         {

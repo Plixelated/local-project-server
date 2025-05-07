@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using project_model;
 using project_server;
 using Microsoft.OpenApi.Models;
+using project_server.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +127,18 @@ builder.Services.AddAuthentication(options =>
 //Scoped Dependency Injection of JWT Handler
 builder.Services.AddScoped<JWTHandler>();
 builder.Services.AddScoped<DataAnalysisService>();
+
+//Policy Based Authorization
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManageUsers", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanManageUsers"));
+    options.AddPolicy("ViewUserData", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanViewUserData"));
+    options.AddPolicy("ManageData", policy => policy.RequireClaim("Permission","CanManageData"));
+
+    options.AddPolicy("UserOnlyAccess", policy => policy.Requirements.Add(new UserOnlyRequirement()));
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, UserOnlyAccessHandler>();
 
 var app = builder.Build();
 
