@@ -2,8 +2,8 @@
 {
     public class EntryDTO
     {
-        public int ID { get; set; }
-        public string Origin { get; set; } = string.Empty;
-        public List<ValuesDTO> SubmittedValues { get; set; } = new List<ValuesDTO>();
+        //public int ID { get; set; }
+        public string OriginID { get; set; } = string.Empty;
+        public List<GroupedDataDTO> SubmittedValues { get; set; } = new List<GroupedDataDTO>();
     }
 }

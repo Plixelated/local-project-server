@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using project_model;
 using project_server.Dtos;
+using System.Security.Claims;
 
 namespace project_server.Controllers
 {
@@ -20,7 +21,7 @@ namespace project_server.Controllers
         ModelContext context, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "ManageUsers")]
         [HttpPost("Users")]
         public async Task ImportUsersAsync()
         {
@@ -40,7 +41,6 @@ namespace project_server.Controllers
             int save = await context.SaveChangesAsync();
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("Admin")]
         public async Task<ActionResult> ImportAdminAsync()
         {
@@ -57,20 +57,28 @@ namespace project_server.Controllers
             DotNetEnv.Env.Load();
             IdentityResult results = await userManager.CreateAsync(user, Environment.GetEnvironmentVariable("AdminPassword"));
             var res = await userManager.AddToRoleAsync(user, "Admin");
+
             int save = await context.SaveChangesAsync();
 
-            if(!results.Succeeded || !res.Succeeded)
+            //Add Claims to User for userid
+            var newUser = await userManager.FindByEmailAsync(user.Email);
+            if (newUser == null) return NotFound();
+
+            //Adds User ID Claim
+            var claim = new Claim("UserID", newUser.Id);
+            var claimRes = await userManager.AddClaimAsync(newUser, claim);
+
+            if (!results.Succeeded || !res.Succeeded || !claimRes.Succeeded)
                 return BadRequest(results.Errors);
 
             return Ok("Admin account created succesfully!");
 
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("roles")]
         public async Task<ActionResult> SeedRoles()
         {
-            string[] roles = new[] { "Admin", "User" };
+            string[] roles = new[] { "Admin", "Researcher", "User" };
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -85,7 +93,49 @@ namespace project_server.Controllers
             return Ok("Roles Created");
         }
 
-        [Authorize(Roles = "Admin")]
+        [HttpPost("AdminClaims")]
+        public async Task<ActionResult> SeedAdminClaims()
+        {
+            var role = await roleManager.FindByNameAsync("Admin");
+            if (role == null)
+                return NotFound("No Role Found");
+
+            var claims = new List<Claim>
+            {
+                new Claim("Permission", "CanManageUsers"),
+                new Claim("Permission", "CanViewUserData"),
+                new Claim("Permission", "CanManageData"),
+            };
+
+            foreach (var claim in claims)
+            {
+                var res = await roleManager.AddClaimAsync(role, claim);
+                if (!res.Succeeded)
+                    return BadRequest(res.Errors);
+            }
+
+
+            return Ok("Claims Added to Admin Role");
+        }
+
+        [HttpPost("ResearcherClaims")]
+        public async Task<ActionResult> SeedResearcherClaims()
+        {
+            var role = await roleManager.FindByNameAsync("Researcher");
+            if (role == null)
+                return NotFound("No Role Found");
+
+            var claim = new Claim("Permission", "CanManageData");
+
+            var res = await roleManager.AddClaimAsync(role, claim);
+            if (!res.Succeeded)
+                return BadRequest(res.Errors);
+
+            return Ok("Claims Added to Admin Role");
+        }
+
+
+        [Authorize(Policy = "ManageUsers")]
         [HttpPost("assign-admin/{email}")]
         public async Task<ActionResult> AssignAdminRole(string email)
         {
@@ -106,34 +156,36 @@ namespace project_server.Controllers
             return Ok($"User {email} elevated to Admin role.");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "ManageData")]
         [HttpPost("RandomData")]
         public async Task<ActionResult> SeedRandomData()
         {
-            for (int i = 0; i < 100; i++) {
-                Random random = new Random();
-                var newEntry = new Entry
+            SubmissionController submissions = new(context);
+            Random random = new Random();
+            var originID = Guid.NewGuid().ToString();
+
+            for (int i = 0; i < 100; i++)
+            {
+                if (i % 10 == 0)
                 {
-                    Origin = Guid.NewGuid().ToString(),
-                    SubmittedValues = new List<Values>
-                {
-                    new Values
-                    {
-                        RateStars = (decimal)(random.NextDouble() * (3-0.1) + 0.1),
-                        FrequencyPlanets = (decimal)(random.NextDouble() * (100-1) + 1),
-                        NearEarth = (short)random.Next(1,10),
-                        FractionLife = (decimal)(random.NextDouble() * (100-1) + 1),
-                        FractionIntelligence = (decimal)(random.NextDouble() * (100-1) + 1),
-                        FractionCommunication = (decimal)(random.NextDouble() * (100-1) + 1),
-                        Length = (long)random.NextInt64(1,10000000000),
-                    }
+                    originID = Guid.NewGuid().ToString();
                 }
+
+                var values =  new Dtos.ValuesDTO
+                {
+                    RateStars = (decimal)(random.NextDouble() * (3 - 0.1) + 0.1),
+                    FrequencyPlanets = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    NearEarth = (short)random.Next(1, 10),
+                    FractionLife = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    FractionIntelligence = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    FractionCommunication = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    Length = (long)random.NextInt64(1, 10000000000),
+                    EntryOrigin = originID,
                 };
 
-                context.Entries.Add(newEntry);
-                await context.SaveChangesAsync();
-            }
+                await submissions.AddNewSubmission(values);
 
+            }
             return Ok(new
             {
                 message = "Data Seeded."

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace project_server;
 
-public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> userManager) //<- DI
+public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager) //<- DI
 {
 
     //Returns token to caller
@@ -31,7 +31,23 @@ public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> u
     private async Task<List<Claim>> GetClaimsAsync(ProjectUser user)
     {
         List<Claim> claims = [new Claim(ClaimTypes.Name, user.UserName!)];
-        claims.AddRange(from role in await userManager.GetRolesAsync(user) select new Claim(ClaimTypes.Role, role));
+        //claims.AddRange(from role in await userManager.GetRolesAsync(user) select new Claim(ClaimTypes.Role, role));
+        
+        //Add All Claims associated with the user's role to the JWT token
+        claims.AddRange(await userManager.GetClaimsAsync(user));
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var roleName in roles)
+        {
+            //Include Role
+            claims.Add(new Claim(ClaimTypes.Role, roleName));
+            var role = await roleManager.FindByNameAsync(roleName);
+            //Include Claims
+            var roleClaims = await roleManager.GetClaimsAsync(role);
+            claims.AddRange(roleClaims);
+        }
+
+
+
         return claims;
     }
 }

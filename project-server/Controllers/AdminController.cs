@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using project_model;
 using project_server.Dtos;
+using Sprache;
 
 namespace project_server.Controllers
 {
@@ -49,6 +51,7 @@ namespace project_server.Controllers
             {
                 Success = true,
                 Message = "Login Succesful",
+                Token = tokenString
             });
         }
 
@@ -80,14 +83,24 @@ namespace project_server.Controllers
 
             await userManager.AddToRoleAsync(user, "User");
 
+            //Add Claims to User for userid
+            var newUser = await userManager.FindByEmailAsync(request.Email);
+            if (newUser == null) return NotFound();
+
+            //Adds User ID Claim
+            var claim = new Claim("UserID", newUser.Id);
+            var res = await userManager.AddClaimAsync(newUser, claim);
+            if (!res.Succeeded)
+                return BadRequest(res.Errors);
+
             return Ok(new
             {
                 Success = true,
-                Message = $"User {request.UserName} created succesfully.",
+                Message = $"User {request.UserName} created succesfully."
             });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy ="ManageUsers")]
         [HttpPost("RegisterAdmin")]
         public async Task<ActionResult> RegisterAdminAsync(Dtos.RegisterRequest request)
         {
@@ -115,5 +128,19 @@ namespace project_server.Controllers
                 Message = $"Admin {request.UserName} created succesfully.",
             });
         }
+
+        [HttpGet("claims")]
+        public IActionResult GetClaims()
+        {
+            return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
+        }
+
+        [Authorize(Policy = "ManageData")]
+        [HttpGet("AdminOnlyTest")]
+        public IActionResult AdminOnlyEndpoint()
+        {
+            return Ok("This is an admin-only endpoint.");
+        }
     }
+
 }
