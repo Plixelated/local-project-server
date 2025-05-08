@@ -5,45 +5,38 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using project_model;
 using project_server.Dtos;
+using project_server.Hubs;
 
 namespace project_server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SubmissionController(ModelContext context) : ControllerBase
+    public class SubmissionController(
+        ModelContext context, 
+        DataService dataService, 
+        SubmissionSeedService submissionSeedService
+        ) : ControllerBase
     {
         //Values is located in context
         //submission is handling these values
         private readonly ModelContext _context = context;
+        private readonly DataService _dataService = dataService;
+        private readonly SubmissionSeedService _submissionSeedService = submissionSeedService;
 
         [HttpPost("CreateEntry")]
         public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
 
-            var newEntry = new Entry
-            {
-                Origin = valuesDto.EntryOrigin,
-                SubmittedValues = new List<Values>
-                {
-                    new Values
-                    {
-                        RateStars = valuesDto.RateStars,
-                        FrequencyPlanets = valuesDto.FrequencyPlanets,
-                        NearEarth = valuesDto.NearEarth,
-                        FractionLife = valuesDto.FractionLife,
-                        FractionIntelligence = valuesDto.FractionIntelligence,
-                        FractionCommunication = valuesDto.FractionCommunication,
-                        Length = valuesDto.Length
-                    }
-                }
-            };
-
+            var newEntry = _submissionSeedService.CreateEntry(valuesDto);
 
             _context.Entries.Add(newEntry);
             await _context.SaveChangesAsync();
+            //Send SignalR Update
+            await _dataService.UpdateData();
 
             return Ok(new
             {
@@ -65,21 +58,13 @@ namespace project_server.Controllers
                 await CreateEntry(valuesDto);
             }
 
-            var newSubmission = new Values
-            {
-                RateStars = valuesDto.RateStars,
-                FrequencyPlanets = valuesDto.FrequencyPlanets,
-                NearEarth = valuesDto.NearEarth,
-                FractionLife = valuesDto.FractionLife,
-                FractionIntelligence = valuesDto.FractionIntelligence,
-                FractionCommunication = valuesDto.FractionCommunication,
-                Length = valuesDto.Length,
-                EntryOrigin = valuesDto.EntryOrigin
-                
-            };
+            var newSubmission = _submissionSeedService.AddNewSubmission(valuesDto);
 
             existingEntry?.SubmittedValues.Add(newSubmission);
             await _context.SaveChangesAsync();
+            //Send SignalR Update
+            await _dataService.UpdateData();
+
             return Ok("Sumbission Added Succesfully");
         }
 

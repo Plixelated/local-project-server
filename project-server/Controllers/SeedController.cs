@@ -18,9 +18,14 @@ namespace project_server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class SeedController(
-        ModelContext context, UserManager<ProjectUser> userManager, RoleManager<IdentityRole> roleManager
+        ModelContext context, 
+        UserManager<ProjectUser> userManager, 
+        RoleManager<IdentityRole> roleManager,
+        SubmissionSeedService submissionSeedService
         ) : ControllerBase
     {
+        private readonly SubmissionSeedService _submissionSeedService = submissionSeedService;
+
         [Authorize(Policy = "ManageUsers")]
         [HttpPost("Users")]
         public async Task ImportUsersAsync()
@@ -160,7 +165,7 @@ namespace project_server.Controllers
         [HttpPost("RandomData")]
         public async Task<ActionResult> SeedRandomData()
         {
-            SubmissionController submissions = new(context);
+            //SubmissionController submissions = new(context);
             Random random = new Random();
             var originID = Guid.NewGuid().ToString();
 
@@ -183,7 +188,26 @@ namespace project_server.Controllers
                     EntryOrigin = originID,
                 };
 
-                await submissions.AddNewSubmission(values);
+                //INSERT ADDNEW SUBMISSION HERE
+                //Check if entry exists with current origin
+                var existingEntry = await context.Entries
+                    .Include(e => e.SubmittedValues)
+                    .FirstOrDefaultAsync(e => e.Origin == values.EntryOrigin);
+
+                if (existingEntry == null)
+                {
+                    //Create New Entry
+                    var newEntry = _submissionSeedService.CreateEntry(values);
+                    context.Entries.Add(newEntry);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    //Update Existing Entry
+                    var newSubmission = _submissionSeedService.AddNewSubmission(values);
+                    existingEntry?.SubmittedValues.Add(newSubmission);
+                    await context.SaveChangesAsync();
+                }
 
             }
             return Ok(new

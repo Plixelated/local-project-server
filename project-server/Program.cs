@@ -8,6 +8,7 @@ using project_server;
 using Microsoft.OpenApi.Models;
 using project_server.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using project_server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,9 +125,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+//SignalR
+builder.Services.AddSignalR();
+
 //Scoped Dependency Injection of JWT Handler
 builder.Services.AddScoped<JWTHandler>();
 builder.Services.AddScoped<DataAnalysisService>();
+builder.Services.AddScoped<DataService>();
+builder.Services.AddScoped<SubmissionSeedService>();
 
 //Policy Based Authorization
 builder.Services.AddAuthorization(options =>
@@ -168,5 +174,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+//Map Signal R
+app.MapHub<DataHub>("/hub");
 
 app.Run();
