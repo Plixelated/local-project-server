@@ -179,6 +179,7 @@ app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData").RequireCors(opt
     .AllowAnyHeader()
     .AllowCredentials()
     .AllowAnyMethod()
+    .WithExposedHeaders("x-signalr-user-agent")
 );
 
 app.Run();
