@@ -175,6 +175,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 //Map Signal R
-app.MapHub<DataHub>("/hub");
+app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData");
 
 app.Run();

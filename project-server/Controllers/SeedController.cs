@@ -21,10 +21,12 @@ namespace project_server.Controllers
         ModelContext context, 
         UserManager<ProjectUser> userManager, 
         RoleManager<IdentityRole> roleManager,
-        SubmissionSeedService submissionSeedService
+        SubmissionSeedService submissionSeedService,
+        DataService dataService
         ) : ControllerBase
     {
         private readonly SubmissionSeedService _submissionSeedService = submissionSeedService;
+        private readonly DataService _dataService = dataService;
 
         [Authorize(Policy = "ManageUsers")]
         [HttpPost("Users")]
@@ -80,6 +82,7 @@ namespace project_server.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("roles")]
         public async Task<ActionResult> SeedRoles()
         {
@@ -98,6 +101,7 @@ namespace project_server.Controllers
             return Ok("Roles Created");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("AdminClaims")]
         public async Task<ActionResult> SeedAdminClaims()
         {
@@ -123,6 +127,7 @@ namespace project_server.Controllers
             return Ok("Claims Added to Admin Role");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("ResearcherClaims")]
         public async Task<ActionResult> SeedResearcherClaims()
         {
@@ -163,13 +168,13 @@ namespace project_server.Controllers
 
         [Authorize(Policy = "ManageData")]
         [HttpPost("RandomData")]
-        public async Task<ActionResult> SeedRandomData()
+        public async Task<ActionResult> SeedRandomData(int seedAmount)
         {
             //SubmissionController submissions = new(context);
             Random random = new Random();
             var originID = Guid.NewGuid().ToString();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < seedAmount; i++)
             {
                 if (i % 10 == 0)
                 {
@@ -209,7 +214,11 @@ namespace project_server.Controllers
                     await context.SaveChangesAsync();
                 }
 
+                //Send SignalR Update
+                await _dataService.UpdateData();
+
             }
+
             return Ok(new
             {
                 message = "Data Seeded."

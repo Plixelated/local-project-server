@@ -43,9 +43,10 @@ namespace project_server.Controllers
             };
 
             Response.Cookies.Append("jwt", tokenString, cookieOptions);
-            var refreshToken = Request.Cookies["jwt"];
+            //CURRENTLY CAUSES A 400 ERROR ON LOGIN
+/*            var refreshToken = Request.Cookies["jwt"];
             if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest(new { Message = "Invalid Token" });
+                return BadRequest(new { Message = "Invalid Token" });*/
 
             return Ok(new LoginResponse
             {
