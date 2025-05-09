@@ -39,7 +39,9 @@ namespace project_server.Controllers
                 HttpOnly = true,
                 Expires = token.ValidTo,
                 SameSite = SameSiteMode.Strict,
-                Secure = true
+                Secure = true,
+                Domain = ".plixel.app",
+                Path="/"
             };
 
             Response.Cookies.Append("jwt", tokenString, cookieOptions);
