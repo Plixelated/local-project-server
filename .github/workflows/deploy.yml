@@ -40,7 +40,7 @@ jobs:
         fi
         
             echo "Publishing Project..."
-              dotnet publish ./project-server/project-server.csproj -c Release -o /var/www/app
+              dotnet publish /var/www/source/project-server/project-server.csproj -c Release -o /var/www/app
 
         if [ $? -ne 0 ]; then
             echo "Dotnet Publish Failed. Exiting"
