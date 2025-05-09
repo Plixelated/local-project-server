@@ -17,6 +17,9 @@ namespace project_server.Controllers
         UserManager<ProjectUser> userManager, JWTHandler jwtHandler, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
+        [HttpGet("test")]
+        public IActionResult Test() => Ok("Test passed");
+
         [HttpPost("Login")]
         public async Task<ActionResult> LoginAsync(Dtos.LoginRequest request)
         {

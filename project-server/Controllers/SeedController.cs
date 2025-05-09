@@ -48,12 +48,6 @@ namespace project_server.Controllers
             int save = await context.SaveChangesAsync();
         }
 
-        [HttpGet("Test")]
-        public IActionResult TestEndpoint()
-        {
-            return Ok("This is a test endpoint!");
-        }
-
         [HttpPost("Admin")]
         public async Task<ActionResult> ImportAdminAsync()
         {
