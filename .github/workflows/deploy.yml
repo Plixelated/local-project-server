@@ -13,6 +13,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish app
+      run: dotnet publish ./project-server/project-server.csproj -c Release -o publish
+
+    - name: Archive publish output
+      run: tar -czf app.tar.gz -C publish .
+
     - name: Set up SSH
       run: |
         mkdir -p ~/.ssh
@@ -20,41 +31,52 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
 
+    - name: Copy build to droplet
+      run: |
+        echo "Copying Build..."
+        scp app.tar.gz ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }}:/tmp/app.tar.gz
+
     - name: Deploy to Droplet
       run: |
         ssh ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
-        set -e
 
-        if [ ! -d "/var/www/source/.git" ]; then
-            echo "Cloning Repository..."
-            git clone https://github.com/Plixelated/local-project-server.git /var/www/source
-        else
-            echo "Pulling Latest Changes..."
-              cd /var/www/source
-              git pull origin master
-        fi
+        echo "Unzipping Build..."
+        tar -xzf /tmp/app.tar.gz -C /var/www/app
 
-        if [ $? -ne 0 ]; then
-            echo "Git pull failed. Exiting"
-            exit 1
-        fi
+        echo "Cleaning up tar file..."
+        rm /tmp/app.tar.gz
+        #set -e
+
+        #if [ ! -d "/var/www/source/.git" ]; then
+        #    echo "Cloning Repository..."
+        #    git clone https://github.com/Plixelated/local-project-server.git /var/www/source
+        #else
+        #    echo "Pulling Latest Changes..."
+        #      cd /var/www/source
+        #      git pull origin master
+        #fi
+
+        #if [ $? -ne 0 ]; then
+        #    echo "Git pull failed. Exiting"
+        #    exit 1
+        #fi
         
-            echo "Publishing Project..."
-              dotnet publish /var/www/source/project-server/project-server.csproj -c Release -o /var/www/app
+        #    echo "Publishing Project..."
+        #      dotnet publish /var/www/source/project-server/project-server.csproj -c Release -o /var/www/app
 
-        if [ $? -ne 0 ]; then
-            echo "Dotnet Publish Failed. Exiting"
-            exit 1
-        fi
+        #if [ $? -ne 0 ]; then
+        #    echo "Dotnet Publish Failed. Exiting"
+        #    exit 1
+        #fi
 
             echo "Restarting Service..."
               systemctl restart project
 
-        if [ $? -ne 0 ]; then
-            echo "Failed to Restart Service. Exiting"
-            exit 1
-        fi
+        #if [ $? -ne 0 ]; then
+        #    echo "Failed to Restart Service. Exiting"
+        #    exit 1
+        #fi
 
-        echo "Project Succesfully Deployed!"
+        #echo "Project Succesfully Deployed!"
 
         EOF
