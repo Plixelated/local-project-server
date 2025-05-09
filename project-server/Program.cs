@@ -162,18 +162,20 @@ else
     corsOrigin = "https://stars.plixel.app";
 }
 
-app.UseCors(option => 
-option.WithOrigins(corsOrigin)
-.AllowAnyHeader()
-.AllowCredentials()
-.AllowAnyMethod()
+
+app.UseRouting();
+
+app.UseCors(option =>
+    option.WithOrigins(corsOrigin)
+    .AllowAnyHeader()
+    .AllowCredentials()
+    .AllowAnyMethod()
 );
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
+
 //Map Signal R
 app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData");
 
