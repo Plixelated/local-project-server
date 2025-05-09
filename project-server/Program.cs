@@ -169,17 +169,6 @@ option.WithOrigins(corsOrigin)
 .AllowAnyMethod()
 );
 
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == HttpMethods.Options)
-    {
-        context.Response.StatusCode = 204;
-        return;
-    }
-
-    await next();
-});
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
