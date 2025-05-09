@@ -17,7 +17,7 @@ namespace project_server.Controllers
         UserManager<ProjectUser> userManager, JWTHandler jwtHandler, RoleManager<IdentityRole> roleManager
         ) : ControllerBase
     {
-        [HttpGet("test")]
+        [HttpGet("Test")]
         public IActionResult Test() => Ok("Test passed");
 
         [HttpPost("Login")]
