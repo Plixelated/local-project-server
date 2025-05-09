@@ -49,9 +49,9 @@ namespace project_server.Controllers
         }
 
         [HttpGet("Test")]
-        public async Task<ActionResult> TestEndpoint()
+        public IActionResult TestEndpoint()
         {
-            return Ok();
+            return Ok("This is a test endpoint!");
         }
 
         [HttpPost("Admin")]
