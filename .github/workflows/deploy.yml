@@ -23,8 +23,8 @@ jobs:
     - name: Deploy to Droplet
       run: |
         ssh ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
-          cd /var/www/app
-          git pull origin main
+          cd /var/www/source
+          git pull origin master
           dotnet publish ./project-server/project-server.csproj -c Release -o /var/www/app
           systemctl restart project
         EOF
