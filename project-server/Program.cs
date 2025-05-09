@@ -163,8 +163,6 @@ else
 }
 
 
-app.UseRouting();
-
 app.UseCors(option =>
     option.WithOrigins(corsOrigin)
     .AllowAnyHeader()
