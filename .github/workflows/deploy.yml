@@ -23,8 +23,38 @@ jobs:
     - name: Deploy to Droplet
       run: |
         ssh ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
-          cd /var/www/source
-          git pull origin master
-          dotnet publish ./project-server/project-server.csproj -c Release -o /var/www/app
-          systemctl restart project
+        set -e
+
+        if [! -d "/var/www/source/.git"]; then
+            echo "Cloning Repository..."
+            git clone https://github.com/Plixelated/local-project-server.git /var/www/source
+        else
+            echo "Pulling Latest Changes..."
+              cd /var/www/source
+              git pull origin master
+        fi
+
+        if [ $? -ne 0]; then
+            echo "Git pull failed. Exiting"
+            exit 1
+        fi
+        
+            echo "Publishing Project..."
+              dotnet publish ./project-server/project-server.csproj -c Release -o /var/www/app
+
+        if [ $? -ne 0]; then
+            echo "Dotnet Publish Failed. Exiting"
+            exit 1
+        fi
+
+            echo "Restarting Service..."
+              systemctl restart project
+
+        if [ $? -ne 0]; then
+            echo "Failed to Restart Service. Exiting"
+            exit 1
+        fi
+
+        echo "Project Succesfully Deployed!"
+
         EOF
