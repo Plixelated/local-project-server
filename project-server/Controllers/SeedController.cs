@@ -178,6 +178,7 @@ namespace project_server.Controllers
         [HttpPost("RandomData")]
         public async Task<ActionResult> SeedRandomData(int seedAmount)
         {
+            int successes = 0;
             //SubmissionController submissions = new(context);
             Random random = new Random();
             var originID = Guid.NewGuid().ToString();
@@ -212,14 +213,31 @@ namespace project_server.Controllers
                     //Create New Entry
                     var newEntry = _submissionSeedService.CreateEntry(values);
                     context.Entries.Add(newEntry);
-                    await context.SaveChangesAsync();
+                    try
+                    {
+                        await context.SaveChangesAsync();
+                        successes++;
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        Console.WriteLine("Error Seeding Value:", ex);
+                    }
                 }
                 else
                 {
                     //Update Existing Entry
                     var newSubmission = _submissionSeedService.AddNewSubmission(values);
                     existingEntry?.SubmittedValues.Add(newSubmission);
-                    await context.SaveChangesAsync();
+                    try
+                    {
+                        await context.SaveChangesAsync();
+                        successes++;
+                    }
+                    catch(DbUpdateException ex)
+                    {
+                        Console.WriteLine("Error Seeding Value:", ex);
+                    }
+                    
                 }
 
                 //Send SignalR Update
@@ -229,7 +247,7 @@ namespace project_server.Controllers
 
             return Ok(new
             {
-                message = "Data Seeded."
+                message = successes + " values succsefully seeded."
             });
         }
     }
