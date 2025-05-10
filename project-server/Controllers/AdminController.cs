@@ -18,7 +18,28 @@ namespace project_server.Controllers
         ) : ControllerBase
     {
         [HttpGet("Test")]
-        public IActionResult Test() => Ok("Test passed");
+        public IActionResult Test() => Ok("Connection Works!");
+
+        [Authorize(Policy = "ManageData")]
+        [HttpGet("ManageDataTest")]
+        public IActionResult ManageDataTest()
+        {
+            return Ok("You Can Manage Data!");
+        }
+
+        [Authorize(Policy = "ManageUsers")]
+        [HttpGet("ManageUsersTest")]
+        public IActionResult ManageUsersTest()
+        {
+            return Ok("You Can Manage Users!");
+        }
+
+        [Authorize(Policy = "ViewUserData")]
+        [HttpGet("ViewUserDataTest")]
+        public IActionResult ViewUserDataTest()
+        {
+            return Ok("You Can View Use rData!");
+        }
 
         [HttpPost("Login")]
         public async Task<ActionResult> LoginAsync(Dtos.LoginRequest request)
@@ -37,7 +58,7 @@ namespace project_server.Controllers
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             //HTTP ONLY COOKIE
-/*            var cookieOptions = new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Expires = token.ValidTo,
@@ -45,11 +66,12 @@ namespace project_server.Controllers
                 Secure = true
             };
 
-            Response.Cookies.Append("jwt", tokenString, cookieOptions);*/
+            Response.Cookies.Append("jwt", tokenString, cookieOptions);
+
             //CURRENTLY CAUSES A 400 ERROR ON LOGIN
-/*            var refreshToken = Request.Cookies["jwt"];
-            if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest(new { Message = "Invalid Token" });*/
+            /*            var refreshToken = Request.Cookies["jwt"];
+                        if (string.IsNullOrEmpty(refreshToken))
+                            return BadRequest(new { Message = "Invalid Token" });*/
 
             return Ok(new LoginResponse
             {
@@ -137,13 +159,6 @@ namespace project_server.Controllers
         public IActionResult GetClaims()
         {
             return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
-        }
-
-        [Authorize(Policy = "ManageData")]
-        [HttpGet("AdminOnlyTest")]
-        public IActionResult AdminOnlyEndpoint()
-        {
-            return Ok("This is an admin-only endpoint.");
         }
     }
 

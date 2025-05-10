@@ -156,18 +156,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     corsOrigin = "http://localhost:4200";
+    //MOVE INTO DEV TO FIX DOUBLE HEADRS IN PROD
+    app.UseCors(option =>
+    option.WithOrigins(corsOrigin)
+    .AllowAnyHeader()
+    .AllowCredentials()
+    .AllowAnyMethod()
+    );
 }
 else
 {
     corsOrigin = "https://stars.plixel.app";
 }
 
-app.UseCors(option =>
-option.WithOrigins(corsOrigin)
-.AllowAnyHeader()
-.AllowCredentials()
-.AllowAnyMethod()
-);
+
 
 app.UseHttpsRedirection();
 
@@ -175,6 +177,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 //Map Signal R
-app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData");
+app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData").RequireCors(option =>
+    option.WithOrigins(corsOrigin)
+    .AllowAnyHeader()
+    .AllowCredentials()
+    .AllowAnyMethod()
+    ); ;//ADD CORS HERE
 
 app.Run();
