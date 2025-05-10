@@ -176,10 +176,14 @@ else
     corsOrigin = "https://stars.plixel.app";
 }
 
-
+app.UseCors(option =>
+option.WithOrigins(corsOrigin)
+.AllowAnyHeader()
+.AllowCredentials()
+.AllowAnyMethod()
+);
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
