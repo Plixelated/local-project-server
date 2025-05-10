@@ -177,11 +177,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 //Map Signal R
-app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData").RequireCors(option =>
-    option.WithOrigins(corsOrigin)
-     .WithHeaders("x-requested-with", "x-signalr-user-agent", "content-type", "authorization")
-    .AllowCredentials()
-    .AllowAnyMethod()
-    ); ;//ADD CORS HERE
+app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData");
 
 app.Run();
