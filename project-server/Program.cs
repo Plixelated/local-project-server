@@ -126,7 +126,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 //SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 //Scoped Dependency Injection of JWT Handler
 builder.Services.AddScoped<JWTHandler>();
@@ -145,6 +148,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddSingleton<IAuthorizationHandler, UserOnlyAccessHandler>();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 
 var app = builder.Build();
 
