@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using project_model;
 using project_server.Dtos;
 using System.Security.Claims;
+using System.Data;
 
 namespace project_server.Controllers
 {
@@ -63,8 +64,15 @@ namespace project_server.Controllers
             //password requires uppercase, digit, and special char
             DotNetEnv.Env.Load();
             IdentityResult results = await userManager.CreateAsync(user, Environment.GetEnvironmentVariable("AdminPassword"));
+            
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                IdentityRole newRole = new IdentityRole("Admin");
+                var addRole = await roleManager.CreateAsync(newRole);
+                if (!addRole.Succeeded)
+                    return BadRequest(addRole.Errors);
+            }
             var res = await userManager.AddToRoleAsync(user, "Admin");
-
             int save = await context.SaveChangesAsync();
 
             //Add Claims to User for userid

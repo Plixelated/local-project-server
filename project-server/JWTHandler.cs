@@ -47,7 +47,6 @@ public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> u
         }
 
 
-
         return claims;
     }
 }
