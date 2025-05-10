@@ -175,7 +175,7 @@ namespace project_server.Controllers
         }
 
         [Authorize(Policy = "ManageData")]
-        [HttpPost("RandomData")]
+        [HttpPost("RandomData/{seedAmount}")]
         public async Task<ActionResult> SeedRandomData(int seedAmount)
         {
             int successes = 0;
