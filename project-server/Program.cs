@@ -156,30 +156,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     corsOrigin = "http://localhost:4200";
-    app.UseCors(option =>
-    option.WithOrigins(corsOrigin)
-    .AllowAnyHeader()
-    .AllowCredentials()
-    .AllowAnyMethod()
-);
-
 }
 else
 {
     corsOrigin = "https://stars.plixel.app";
 }
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-
-//Map Signal R
-app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData").RequireCors(option =>
-    option.WithOrigins(corsOrigin)
-    .AllowAnyHeader()
-    .AllowCredentials()
-    .AllowAnyMethod()
-    .WithExposedHeaders("x-signalr-user-agent")
+app.UseCors(option =>
+option.WithOrigins(corsOrigin)
+.AllowAnyHeader()
+.AllowCredentials()
+.AllowAnyMethod()
 );
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+//Map Signal R
+app.MapHub<DataHub>("/hub").RequireAuthorization("ViewUserData");
 
 app.Run();

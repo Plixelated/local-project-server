@@ -37,7 +37,7 @@ namespace project_server.Controllers
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             //HTTP ONLY COOKIE
-            var cookieOptions = new CookieOptions
+/*            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Expires = token.ValidTo,
@@ -45,7 +45,7 @@ namespace project_server.Controllers
                 Secure = true
             };
 
-            Response.Cookies.Append("jwt", tokenString, cookieOptions);
+            Response.Cookies.Append("jwt", tokenString, cookieOptions);*/
             //CURRENTLY CAUSES A 400 ERROR ON LOGIN
 /*            var refreshToken = Request.Cookies["jwt"];
             if (string.IsNullOrEmpty(refreshToken))
