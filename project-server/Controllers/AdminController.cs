@@ -41,7 +41,7 @@ namespace project_server.Controllers
             {
                 HttpOnly = true,
                 Expires = token.ValidTo,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true
             };
 
