@@ -23,6 +23,7 @@ public partial class Entry
     public string Origin { get; set; } = string.Empty;
 
     [InverseProperty("Entry")]
+    //use ICollection for Lists!
     public virtual ICollection<Values> SubmittedValues { get; set; } = new List<Values>();
-    //public ICollection<UserOrigin> UserOrigin { get; set; }
+    public UserOrigin UserOrigin { get; set; }
 }

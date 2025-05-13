@@ -17,6 +17,7 @@ public class ModelContext : IdentityDbContext<ProjectUser>
 
     public DbSet<Entry> Entries { get; set; }
     public DbSet<Values> SubmittedValues { get; set; }
+    public DbSet<UserOrigin> UserOrigin { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
@@ -78,11 +79,15 @@ public class ModelContext : IdentityDbContext<ProjectUser>
         modelBuilder.Entity<UserOrigin>(entity =>
         {
             entity.HasKey(uo => new { uo.UserId, uo.EntryOrigin });
-            entity.HasOne(uo => uo.User)
-            .WithOne(u => u.UserOrigin)
-            .HasForeignKey<UserOrigin>(uo => uo.UserId);
 
+            entity.HasOne(uo => uo.User) //One
+            .WithOne(u => u.UserOrigin) //To One
+            .HasForeignKey<UserOrigin>(uo => uo.UserId); //Explicitly define FK
 
+            entity.HasOne(uo => uo.Entry) //One
+            .WithOne(e => e.UserOrigin) //To One
+            .HasForeignKey<UserOrigin>(uo => uo.EntryOrigin) //Explicitly define FK
+            .HasPrincipalKey<Entry>(e => e.Origin); //Use origin for FK even though its not the PK of entry
         });
     }
 }

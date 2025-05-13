@@ -4,6 +4,6 @@ namespace project_model
 {
     public class ProjectUser : IdentityUser
     {
-        //public ICollection<UserOrigin> UserOrigin { get; set; }
+        public UserOrigin UserOrigin { get; set; }
     }
 }

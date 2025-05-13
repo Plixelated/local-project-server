@@ -1,22 +1,29 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Data.SqlTypes;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using project_model;
 using project_server.Dtos;
-using Sprache;
 
 namespace project_server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AdminController(
-        UserManager<ProjectUser> userManager, JWTHandler jwtHandler, RoleManager<IdentityRole> roleManager
+        UserManager<ProjectUser> userManager, 
+        JWTHandler jwtHandler, 
+        RoleManager<IdentityRole> roleManager,
+        ModelContext context
         ) : ControllerBase
     {
+        private ModelContext _context = context;
+
+
         [HttpGet("Test")]
         public IActionResult Test() => Ok("Test passed");
 
@@ -97,6 +104,37 @@ namespace project_server.Controllers
             if (!res.Succeeded)
                 return BadRequest(res.Errors);
 
+
+            //JANK SHIT HERE
+            //TODO: Remove UserOrigin Table, change Entry Table to origin table
+            //Add column for optional UserID as a FK to userID table with a 1:1 relationship
+            //Cleaner more effective, and avoids this jank below
+            //Check if entry exists with current origin
+            var existingEntry = await _context.Entries
+                .Include(e => e.SubmittedValues)
+                .FirstOrDefaultAsync(e => e.Origin == request.OriginID);
+
+            if (existingEntry == null)
+            {
+                var newEntry = new Entry
+                {
+                    Origin = request.OriginID,
+                    SubmittedValues = new List<Values>()
+                };
+                _context.Entries.Add(newEntry);
+            }
+            //END JANKY SHIT
+
+            UserOrigin originUserLink = new()
+            {
+                UserId = newUser.Id,
+                EntryOrigin = request.OriginID
+            };
+
+            _context.UserOrigin.Add(originUserLink);
+
+            await _context.SaveChangesAsync();
+
             return Ok(new
             {
                 Success = true,
@@ -151,6 +189,62 @@ namespace project_server.Controllers
         {
             return Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => new { c.Value }).ToList());
         }
+
+
+        [HttpPost("SetUserOriginID/{originID}")]
+        public async Task<IActionResult> SetUserOriginID(string originID)
+        {
+            //Get User ID
+            var userName = User?.Identity?.Name;
+            var userInfo = await userManager.FindByNameAsync(userName);
+            var userID = userInfo!.Id;
+
+            if (userID != string.Empty)
+            {
+
+                //Check if Link Already Exists
+                var link = await _context.UserOrigin
+                                .FirstOrDefaultAsync(e => e.UserId == userID);
+
+                //If Link exists
+                if (link != null)
+                {
+                    return Ok("User has existing origin.");
+                }
+
+                //If link doesn't exist
+                UserOrigin originUserLink = new()
+                {
+                    UserId = userID,
+                    EntryOrigin = originID
+                };
+
+                _context.UserOrigin.Add(originUserLink);
+                await _context.SaveChangesAsync();
+
+                return Ok("User Origin Link Added");
+            }
+
+            return BadRequest("User Not Found.");
+
+        }
+
+        
+        [HttpGet("GetUserOriginID")]
+        public async Task<ActionResult> GetUserOriginID()
+        {
+            var userName = User?.Identity?.Name;
+            var userInfo = await userManager.FindByNameAsync(userName);
+            var userID = userInfo!.Id;
+
+            var link = await _context.UserOrigin.FirstOrDefaultAsync(e => e.UserId == userID);
+
+            if (link != null)
+                return Ok(new { link?.EntryOrigin });
+
+            return BadRequest("No Origin ID found");
+        }
+
     }
 
 }

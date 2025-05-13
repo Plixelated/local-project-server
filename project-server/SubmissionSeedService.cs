@@ -28,7 +28,7 @@ public class SubmissionSeedService(ModelContext context)
                         FractionCommunication = valuesDto.FractionCommunication,
                         Length = valuesDto.Length
                     }
-                }
+            }
         };
 
 

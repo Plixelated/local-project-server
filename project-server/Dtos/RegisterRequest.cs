@@ -5,5 +5,6 @@ namespace project_server.Dtos
     public class RegisterRequest : LoginRequest
     {
         public required string Email { get; set; }
+        public required string OriginID { get; set; }
     }
 }

@@ -103,7 +103,7 @@ namespace project_server.Controllers
             else{ return BadRequest("Invalid Options"); }
         }
 
-        [HttpPost("GetUserSubmissions/{user}")] //use a Json with filters for this
+/*        [HttpPost("GetUserSubmissions/{user}")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
         {
             if (filters.VariableFilter.ToLower() == "all")
@@ -127,6 +127,6 @@ namespace project_server.Controllers
                 return Ok(values);
             }
             else { return BadRequest("Invalid Options"); }
-        }
+        }*/
     }
 }
