@@ -102,5 +102,31 @@ namespace project_server.Controllers
             }
             else{ return BadRequest("Invalid Options"); }
         }
+
+        [HttpPost("GetUserSubmissions/{user}")] //use a Json with filters for this
+        public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
+        {
+            if (filters.VariableFilter.ToLower() == "all")
+            {
+                string[] variables = ["r_s", "f_p", "n_e", "f_l", "f_i", "f_c", "l"];
+
+                List<System.Object> values = new List<System.Object>();
+
+                List<Values> data = await _context.SubmittedValues
+                    .Where(e => e.EntryOrigin == )
+                    .ToListAsync();
+
+                foreach (var variable in variables)
+                {
+                    List<FilteredData> filteredData = _analysisService.FilterDataSet(data, variable);
+                    List<AggregateData> aggData = _analysisService.PerformOperation(filteredData, filters.OperationFilter);
+                    values.Add(aggData);
+                }
+
+
+                return Ok(values);
+            }
+            else { return BadRequest("Invalid Options"); }
+        }
     }
 }

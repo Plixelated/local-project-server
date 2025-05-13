@@ -10,11 +10,11 @@ namespace project_model;
 public partial class UserOrigin
 {
     //Set up later 5/1
-/*    [ForeignKey(nameof(User))]
+    [ForeignKey(nameof(User))]
     public string UserId { get; set; }
     public virtual ProjectUser User { get; set; }
 
     [ForeignKey(nameof(Entry))]
     public string EntryOrigin { get; set; }
-    public virtual Entry Entry { get; set; }*/
+    public virtual Entry Entry { get; set; }
 }

@@ -145,6 +145,12 @@ namespace project_server.Controllers
         {
             return Ok("This is an admin-only endpoint.");
         }
+
+        [HttpGet("GetUserRole")]
+        public IActionResult GetUserRole()
+        {
+            return Ok(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => new { c.Value }).ToList());
+        }
     }
 
 }

@@ -75,7 +75,7 @@ public class ModelContext : IdentityDbContext<ProjectUser>
         });
 
         //Need to build entity later
-/*        modelBuilder.Entity<UserOrigin>(entity =>
+        modelBuilder.Entity<UserOrigin>(entity =>
         {
             entity.HasKey(uo => new { uo.UserId, uo.EntryOrigin });
             entity.HasOne(uo => uo.User)
@@ -83,6 +83,6 @@ public class ModelContext : IdentityDbContext<ProjectUser>
             .HasForeignKey<UserOrigin>(uo => uo.UserId);
 
 
-        });*/
+        });
     }
 }
