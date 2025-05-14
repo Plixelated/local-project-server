@@ -237,7 +237,7 @@ namespace project_server.Controllers
                 {
                     RateStars = (decimal)(random.NextDouble() * (3 - 0.1) + 0.1),
                     FrequencyPlanets = (decimal)(random.NextDouble() * (100 - 1) + 1),
-                    NearEarth = (short)random.Next(1, 10),
+                    NearEarth = (decimal)random.Next(1, 10),
                     FractionLife = (decimal)(random.NextDouble() * (100 - 1) + 1),
                     FractionIntelligence = (decimal)(random.NextDouble() * (100 - 1) + 1),
                     FractionCommunication = (decimal)(random.NextDouble() * (100 - 1) + 1),

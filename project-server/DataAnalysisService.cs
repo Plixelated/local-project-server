@@ -49,7 +49,7 @@ public class DataAnalysisService
             }).ToList(),
             "n_e" => data.Select(v => new FilteredData
             {
-                Value = Convert.ToDecimal(v.NearEarth),
+                Value = v.NearEarth,
                 OriginID = v.EntryOrigin,
                 Field = filter
             }).ToList(),
@@ -81,7 +81,7 @@ public class DataAnalysisService
             {
                 new FilteredData { Value = v.RateStars, OriginID = v.EntryOrigin, Field = "r_s"},
                 new FilteredData { Value = v.FrequencyPlanets, OriginID = v.EntryOrigin, Field = "f_p" },
-                new FilteredData { Value = Convert.ToDecimal(v.NearEarth), OriginID = v.EntryOrigin, Field = "n_e" },
+                new FilteredData { Value = v.NearEarth, OriginID = v.EntryOrigin, Field = "n_e" },
                 new FilteredData { Value = v.FractionLife, OriginID = v.EntryOrigin, Field = "f_l" },
                 new FilteredData { Value = v.FractionIntelligence, OriginID = v.EntryOrigin, Field = "f_i" },
                 new FilteredData { Value = v.FractionCommunication, OriginID = v.EntryOrigin, Field = "f_c"},
@@ -148,7 +148,7 @@ public class DataAnalysisService
             {
                 case "r_s": results.r_s = aggregate; break;
                 case "f_p": results.f_p = aggregate; break;
-                case "n_e": results.n_e = Convert.ToDecimal(aggregate); break;
+                case "n_e": results.n_e = aggregate; break;
                 case "f_l": results.f_l = aggregate; break;
                 case "f_i": results.f_i = aggregate; break;
                 case "f_c": results.f_c = aggregate; break;
