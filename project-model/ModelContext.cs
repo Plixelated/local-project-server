@@ -75,19 +75,20 @@ public class ModelContext : IdentityDbContext<ProjectUser>
 
         });
 
-        //Need to build entity later
         modelBuilder.Entity<UserOrigin>(entity =>
         {
             entity.HasKey(uo => new { uo.UserId, uo.EntryOrigin });
 
             entity.HasOne(uo => uo.User) //One
             .WithOne(u => u.UserOrigin) //To One
-            .HasForeignKey<UserOrigin>(uo => uo.UserId); //Explicitly define FK
+            .HasForeignKey<UserOrigin>(uo => uo.UserId) //Explicitly define FK
+            .OnDelete(DeleteBehavior.Cascade); //Cascades Delete so if user is deleted so is the link
 
             entity.HasOne(uo => uo.Entry) //One
             .WithOne(e => e.UserOrigin) //To One
             .HasForeignKey<UserOrigin>(uo => uo.EntryOrigin) //Explicitly define FK
-            .HasPrincipalKey<Entry>(e => e.Origin); //Use origin for FK even though its not the PK of entry
+            .HasPrincipalKey<Entry>(e => e.Origin) //Use origin for FK even though its not the PK of entry
+            .OnDelete(DeleteBehavior.Cascade); //Cascades Delete so if entry is deleted so is the Link
         });
     }
 }

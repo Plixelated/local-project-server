@@ -142,9 +142,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ManageUsers", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanManageUsers"));
     options.AddPolicy("ViewUserData", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanViewUserData"));
-    options.AddPolicy("ManageData", policy => policy.RequireClaim("Permission","CanManageData"));
+    options.AddPolicy("ManageAllData", policy => policy.RequireClaim("Permission","CanManageAllData"));
 
-    options.AddPolicy("UserOnlyAccess", policy => policy.Requirements.Add(new UserOnlyRequirement()));
+    options.AddPolicy("UserOnlyAccess", policy => policy.RequireClaim("Permission", "HasUserID"));
 });
 
 builder.Services.AddSingleton<IAuthorizationHandler, UserOnlyAccessHandler>();

@@ -13,6 +13,7 @@ using project_model;
 using project_server.Dtos;
 using System.Security.Claims;
 using System.Data;
+using System.Security.Cryptography.X509Certificates;
 
 namespace project_server.Controllers
 {
@@ -121,14 +122,20 @@ namespace project_server.Controllers
             {
                 new Claim("Permission", "CanManageUsers"),
                 new Claim("Permission", "CanViewUserData"),
-                new Claim("Permission", "CanManageData"),
+                new Claim("Permission", "CanManageAllData"),
+                new Claim("Permission", "HasUserID"),
             };
+
+            var existingClaims = await roleManager.GetClaimsAsync(role);
 
             foreach (var claim in claims)
             {
-                var res = await roleManager.AddClaimAsync(role, claim);
-                if (!res.Succeeded)
-                    return BadRequest(res.Errors);
+                if (!existingClaims.Any(c => c.Value == claim.Value))
+                {
+                    var res = await roleManager.AddClaimAsync(role, claim);
+                    if (!res.Succeeded)
+                        return BadRequest(res.Errors);
+                }
             }
 
 
@@ -143,13 +150,49 @@ namespace project_server.Controllers
             if (role == null)
                 return NotFound("No Role Found");
 
-            var claim = new Claim("Permission", "CanManageData");
+            var claims = new List<Claim>
+            {
+                new Claim("Permission", "CanManageUsers"),
+                new Claim("Permission", "CanManageAllData"),
+                new Claim("Permission", "HasUserID"),
+            };
 
-            var res = await roleManager.AddClaimAsync(role, claim);
-            if (!res.Succeeded)
-                return BadRequest(res.Errors);
+            var existingClaims = await roleManager.GetClaimsAsync(role);
 
-            return Ok("Claims Added to Admin Role");
+            foreach (var claim in claims)
+            {
+                if (!existingClaims.Any(c => c.Value == claim.Value))
+                {
+                    var res = await roleManager.AddClaimAsync(role, claim);
+                    if (!res.Succeeded)
+                        return BadRequest(res.Errors);
+                }
+            };
+
+            return Ok("Claims Added to Researcher Role");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("UserClaims")]
+        public async Task<ActionResult> SeedUserClaims()
+        {
+            var role = await roleManager.FindByNameAsync("User");
+            if (role == null)
+                return NotFound("No Role Found");
+
+            var claim = new Claim("Permission", "HasUserID");
+
+            var existingClaims = await roleManager.GetClaimsAsync(role);
+
+            if (!existingClaims.Any(c => c.Value == claim.Value))
+            {
+                var res = await roleManager.AddClaimAsync(role, claim);
+                if (!res.Succeeded)
+                    return BadRequest(res.Errors);
+            }
+
+
+            return Ok("Claims Added to User Role");
         }
 
 
@@ -174,7 +217,7 @@ namespace project_server.Controllers
             return Ok($"User {email} elevated to Admin role.");
         }
 
-        [Authorize(Policy = "ManageData")]
+        [Authorize(Policy = "ManageAllData")]
         [HttpPost("RandomData/{seedAmount}")]
         public async Task<ActionResult> SeedRandomData(int seedAmount)
         {

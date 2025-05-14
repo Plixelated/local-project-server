@@ -26,7 +26,7 @@ public partial class Values
 
     //% of planets that support life
     [Column("n_e", TypeName = "decimal(5,2)")]
-    public short NearEarth { get; set; }
+    public decimal NearEarth { get; set; }
 
     //% planets that develop life
     [Column("f_l", TypeName = "decimal(5,2)")]

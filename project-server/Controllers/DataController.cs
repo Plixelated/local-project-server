@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,15 @@ using System.Data;
 namespace project_server.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = "ViewUserData")]
+    [Authorize(Policy = "UserOnlyAccess")]
     [ApiController]
-    public class DataController(ModelContext context, DataAnalysisService analysisService) : ControllerBase
+    public class DataController(
+        ModelContext context, DataAnalysisService analysisService, UserManager<ProjectUser> userManager) : ControllerBase
     {
         private readonly ModelContext _context = context;
         private readonly DataAnalysisService _analysisService = analysisService;
 
+        [Authorize(Policy = "ViewUserData")]
         [HttpGet("GetRawData")]
         public async Task<ActionResult<IEnumerable<EntryDTO>>> GetRawData()
         {
@@ -68,6 +71,7 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
+        [Authorize(Policy = "ViewUserData")]
         [HttpPost("GetFilteredDataset")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetFilteredDataset(Dtos.DataFilterDTO filters)
         {
@@ -79,6 +83,7 @@ namespace project_server.Controllers
             return Ok(results);
         }
 
+        [Authorize(Policy = "ViewUserData")]
         [HttpPost("GetAllData")] //use a Json with filters for this
         public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
         {
@@ -103,30 +108,43 @@ namespace project_server.Controllers
             else{ return BadRequest("Invalid Options"); }
         }
 
-/*        [HttpPost("GetUserSubmissions/{user}")] //use a Json with filters for this
-        public async Task<ActionResult<Values>> GetAllData(Dtos.DataFilterDTO filters)
+        [HttpGet("GetUserSubmissions")]
+        public async Task<ActionResult<IEnumerable<EntryDTO>>> GetUserData()
         {
-            if (filters.VariableFilter.ToLower() == "all")
-            {
-                string[] variables = ["r_s", "f_p", "n_e", "f_l", "f_i", "f_c", "l"];
+            var userName = User?.Identity?.Name;
+            var userInfo = await userManager.FindByNameAsync(userName);
+            var userID = userInfo!.Id;
 
-                List<System.Object> values = new List<System.Object>();
+            if (userInfo == null)
+                return BadRequest("User Not Found");
 
-                List<Values> data = await _context.SubmittedValues
-                    .Where(e => e.EntryOrigin == )
-                    .ToListAsync();
+            var link = await _context.UserOrigin.FirstOrDefaultAsync(e => e.UserId == userID);
+            var originID = link?.EntryOrigin;
 
-                foreach (var variable in variables)
+            if (originID == null)
+                return BadRequest("OriginID Not Found");
+
+            var entry = await _context.SubmittedValues.Where(s => s.EntryOrigin == originID).ToListAsync();
+
+            var groupedData = entry
+                .GroupBy(e => e.EntryOrigin)
+                .Select(g => new EntryDTO
                 {
-                    List<FilteredData> filteredData = _analysisService.FilterDataSet(data, variable);
-                    List<AggregateData> aggData = _analysisService.PerformOperation(filteredData, filters.OperationFilter);
-                    values.Add(aggData);
-                }
+                    OriginID = g.Key,
+                    SubmittedValues = g.Select(v => new GroupedDataDTO
+                    {
+                        Id = v.SubmissionID,
+                        r_s = v.RateStars,
+                        f_p = v.FrequencyPlanets,
+                        n_e = v.NearEarth,
+                        f_l = v.FractionLife,
+                        f_i = v.FractionIntelligence,
+                        f_c = v.FractionCommunication,
+                        l = v.Length
+                    }).ToList()
+                }).ToList();
 
-
-                return Ok(values);
-            }
-            else { return BadRequest("Invalid Options"); }
-        }*/
+            return groupedData;
+        }
     }
 }

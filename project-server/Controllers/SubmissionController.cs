@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using project_server.Hubs;
 
 namespace project_server.Controllers
 {
+    [Authorize(Policy = "UserOnlyAccess")]
     [Route("api/[controller]")]
     [ApiController]
     public class SubmissionController(
@@ -27,6 +29,8 @@ namespace project_server.Controllers
         private readonly DataService _dataService = dataService;
         private readonly SubmissionSeedService _submissionSeedService = submissionSeedService;
 
+        //Anyone can submit
+        [AllowAnonymous]
         [HttpPost("CreateEntry")]
         public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
@@ -45,6 +49,8 @@ namespace project_server.Controllers
             });
         }
 
+        //Anyone can submit
+        [AllowAnonymous]
         [HttpPost("CreateSubmission")]
         public async Task<ActionResult<Values>> AddNewSubmission([FromBody] ValuesDTO valuesDto)
         {
@@ -68,7 +74,6 @@ namespace project_server.Controllers
             return Ok("Sumbission Added Succesfully");
         }
 
-        [Authorize(Policy="ManageData")]
         [HttpDelete("Delete/{submissionID}")]
         public async Task<IActionResult> DeleteSubmission(int submissionID)
         {
@@ -87,7 +92,6 @@ namespace project_server.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy="ManageData")]
         [HttpPut("Edit")]
         public async Task<IActionResult> EditSubmission(EditDataDTO editData)
         {
@@ -101,7 +105,7 @@ namespace project_server.Controllers
             //SET entity.value = editData.value
             entity.RateStars = editData.r_s;
             entity.FrequencyPlanets = editData.f_p;
-            entity.NearEarth = (short)editData.n_e;
+            entity.NearEarth = editData.n_e;
             entity.FractionLife = editData.f_l;
             entity.FractionIntelligence = editData.f_i;
             entity.FractionCommunication = editData.f_c;

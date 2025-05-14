@@ -9,7 +9,7 @@ namespace project_server.Dtos
         public int Id { get; set; }
         public decimal RateStars {  get; set; }
         public decimal FrequencyPlanets { get; set; }
-        public short NearEarth { get; set; }
+        public decimal NearEarth { get; set; }
         public decimal FractionLife { get; set; }
         public decimal FractionIntelligence { get; set; }
         public decimal FractionCommunication { get; set; }

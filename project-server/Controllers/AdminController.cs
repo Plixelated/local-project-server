@@ -98,11 +98,12 @@ namespace project_server.Controllers
             var newUser = await userManager.FindByEmailAsync(request.Email);
             if (newUser == null) return NotFound();
 
+            //Redundant since it is added to roles now
             //Adds User ID Claim
-            var claim = new Claim("UserID", newUser.Id);
+/*            var claim = new Claim("UserID", newUser.Id);
             var res = await userManager.AddClaimAsync(newUser, claim);
             if (!res.Succeeded)
-                return BadRequest(res.Errors);
+                return BadRequest(res.Errors);*/
 
 
             //JANK SHIT HERE
@@ -177,7 +178,7 @@ namespace project_server.Controllers
             return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
         }
 
-        [Authorize(Policy = "ManageData")]
+        [Authorize(Policy = "ManageAllData")]
         [HttpGet("AdminOnlyTest")]
         public IActionResult AdminOnlyEndpoint()
         {
