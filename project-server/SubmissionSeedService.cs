@@ -5,14 +5,16 @@ using project_server.Dtos;
 
 namespace project_server;
 
-public class SubmissionSeedService(ModelContext context)
+//This Service handles the creation of Entry and Value DTO objects
+//By abstracting it into this service, the operations can be shared
+//by the Submission Controller and Seed Contoller.
+
+
+public class SubmissionSeedService()
 {
-
-    private readonly ModelContext _context = context;
-
     public Entry CreateEntry(ValuesDTO valuesDto)
     {
-
+        //Creates and populates a new Entry
         var newEntry = new Entry
         {
             Origin = valuesDto.EntryOrigin,
@@ -38,6 +40,7 @@ public class SubmissionSeedService(ModelContext context)
 
     public Values AddNewSubmission(ValuesDTO valuesDto)
     {
+        //Creates and populates a new submission
         var newSubmission = new Values
         {
             RateStars = valuesDto.RateStars,

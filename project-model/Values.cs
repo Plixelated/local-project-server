@@ -7,13 +7,19 @@ using project_model;
 
 namespace project_model;
 
+//This table is the list of submitted values
+//that a user can submit. They can make mulitple
+//submissions all linked to a single entry and
+//OriginID. Which can then be linked to a user
+//Id if they decide to register for an account.
+
 [Table("Values")]
 public partial class Values
 {
+    //TODO: Change to string to use UUID
     [Key]
     [Column("submission_id")]
     public int SubmissionID { get; set; }
-    //Change to string to use UUID
 
     //FORMULA VARIABLES
     //Star Formation Rate
@@ -50,6 +56,7 @@ public partial class Values
     [Unicode(false)]
     public string EntryOrigin { get; set; }
 
+    //Link for FK
     [InverseProperty("SubmittedValues")]
     public virtual Entry Entry { get; set; } = null;
 }

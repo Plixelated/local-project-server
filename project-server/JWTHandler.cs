@@ -30,8 +30,8 @@ public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> u
 
     private async Task<List<Claim>> GetClaimsAsync(ProjectUser user)
     {
+        //Create list of claims assoiciated with the user
         List<Claim> claims = [new Claim(ClaimTypes.Name, user.UserName!)];
-        //claims.AddRange(from role in await userManager.GetRolesAsync(user) select new Claim(ClaimTypes.Role, role));
         
         //Add All Claims associated with the user's role to the JWT token
         claims.AddRange(await userManager.GetClaimsAsync(user));
@@ -45,7 +45,6 @@ public class JWTHandler(IConfiguration configuration, UserManager<ProjectUser> u
             var roleClaims = await roleManager.GetClaimsAsync(role);
             claims.AddRange(roleClaims);
         }
-
 
         return claims;
     }

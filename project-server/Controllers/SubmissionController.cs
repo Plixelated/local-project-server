@@ -12,8 +12,11 @@ using project_model;
 using project_server.Dtos;
 using project_server.Hubs;
 
+//This controller handles Submissions to the database
+
 namespace project_server.Controllers
 {
+    //Restricted to those with a user account
     [Authorize(Policy = "UserOnlyAccess")]
     [Route("api/[controller]")]
     [ApiController]
@@ -29,14 +32,14 @@ namespace project_server.Controllers
         private readonly DataService _dataService = dataService;
         private readonly SubmissionSeedService _submissionSeedService = submissionSeedService;
 
-        //Anyone can submit
+        //Allows anyone to submit
         [AllowAnonymous]
         [HttpPost("CreateEntry")]
         public async Task<ActionResult<Entry>> CreateEntry([FromBody] ValuesDTO valuesDto)
         {
-
+            //Create new entry
             var newEntry = _submissionSeedService.CreateEntry(valuesDto);
-
+            //Add entry to db
             _context.Entries.Add(newEntry);
             await _context.SaveChangesAsync();
             //Send SignalR Update
@@ -49,7 +52,7 @@ namespace project_server.Controllers
             });
         }
 
-        //Anyone can submit
+        //Allows anyone to submit
         [AllowAnonymous]
         [HttpPost("CreateSubmission")]
         public async Task<ActionResult<Values>> AddNewSubmission([FromBody] ValuesDTO valuesDto)
@@ -58,14 +61,15 @@ namespace project_server.Controllers
             var existingEntry = await _context.Entries
                 .Include(e => e.SubmittedValues)
                 .FirstOrDefaultAsync(e => e.Origin == valuesDto.EntryOrigin);
-
+            //If it doesn't
             if (existingEntry == null)
             {
+                //create new entry instead
                 await CreateEntry(valuesDto);
             }
-
+            //If it does
             var newSubmission = _submissionSeedService.AddNewSubmission(valuesDto);
-
+            //Add values to entry
             existingEntry?.SubmittedValues.Add(newSubmission);
             await _context.SaveChangesAsync();
             //Send SignalR Update
@@ -74,15 +78,16 @@ namespace project_server.Controllers
             return Ok("Sumbission Added Succesfully");
         }
 
+        //Allow users to delete their sumbissions
         [HttpDelete("Delete/{submissionID}")]
         public async Task<IActionResult> DeleteSubmission(int submissionID)
         {
+            //Find submission
             var entry = await _context.SubmittedValues.FindAsync(submissionID);
+            //If it doesn't exist send an error message
             if (entry == null)
-            {
                 return NotFound();
-            }
-
+            //Submission from database
             _context.SubmittedValues.Remove(entry);
             await _context.SaveChangesAsync();
 
@@ -92,13 +97,14 @@ namespace project_server.Controllers
             return NoContent();
         }
 
+        //Allow users to edit their sumbissions
         [HttpPut("Edit")]
         public async Task<IActionResult> EditSubmission(EditDataDTO editData)
         {
-
+            //Get Submission
             //WHERE ID = editData.id;
             var entity = _context.SubmittedValues.FirstOrDefault(e => e.SubmissionID == editData.Id);
-
+            //If not found, return error
             if(entity == null)
                 return NotFound();
 
@@ -111,6 +117,7 @@ namespace project_server.Controllers
             entity.FractionCommunication = editData.f_c;
             entity.Length = (long)editData.l;
 
+            //Manually tell the database that these values have been modified
             _context.Entry(entity).Property(e => e.RateStars).IsModified = true;
             _context.Entry(entity).Property(e => e.FrequencyPlanets).IsModified = true;
             _context.Entry(entity).Property(e => e.NearEarth).IsModified = true;
@@ -119,6 +126,7 @@ namespace project_server.Controllers
             _context.Entry(entity).Property(e => e.FractionCommunication).IsModified = true;
             _context.Entry(entity).Property(e => e.Length).IsModified = true;
 
+            //Save changes, if any issues return a database concurrency error
             try
             {
                 await _context.SaveChangesAsync();
@@ -140,6 +148,7 @@ namespace project_server.Controllers
             return NoContent();
         }
 
+        //Check if the submission exists in the database
         private bool SubmissionExists(int id)
         {
             return _context.SubmittedValues.Any(e => e.SubmissionID == id);

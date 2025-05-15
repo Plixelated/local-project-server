@@ -6,22 +6,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using project_model;
 using project_server;
 using Microsoft.OpenApi.Models;
-using project_server.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using project_server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( c =>
 {
     c.SwaggerDoc("v1", new()
     {
-        //Lets swagger to keep the token
+        //Lets swagger keep the token
         Contact = new()
         {
             Email = "development@plixelated.mozmail.com",
@@ -30,7 +27,7 @@ builder.Services.AddSwaggerGen( c =>
         },
         Description = "APIs for Drake Equation",
         Title = "Drake Equation APIs",
-        Version = "V1"
+        Version = "V2"
     });
     OpenApiSecurityScheme jwtSecurityScheme = new()
     {
@@ -53,7 +50,7 @@ builder.Services.AddSwaggerGen( c =>
     });
 });
 
-//Load ENV
+//Load ENV and ENV values
 DotNetEnv.Env.Load();
 var _connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 if (string.IsNullOrEmpty(_connectionString))
@@ -110,7 +107,7 @@ builder.Services.AddAuthentication(options =>
             ) ?? throw new InvalidOperationException()
     };
 
-    //HTTP ONLY COOKIE
+    //FOR HTTP ONLY COOKIE
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -131,7 +128,7 @@ builder.Services.AddSignalR(options =>
     options.EnableDetailedErrors = true;
 });
 
-//Scoped Dependency Injection of JWT Handler
+//Scoped Dependency Injection of Services
 builder.Services.AddScoped<JWTHandler>();
 builder.Services.AddScoped<DataAnalysisService>();
 builder.Services.AddScoped<DataService>();
@@ -140,36 +137,30 @@ builder.Services.AddScoped<SubmissionSeedService>();
 //Policy Based Authorization
 builder.Services.AddAuthorization(options =>
 {
+    //Additional Restrictions so that only Admins can have these claims
     options.AddPolicy("ManageUsers", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanManageUsers"));
     options.AddPolicy("ViewUserData", policy => policy.RequireRole("Admin").RequireClaim("Permission","CanViewUserData"));
+    //Non Admin Restricted Perms
     options.AddPolicy("ManageAllData", policy => policy.RequireClaim("Permission","CanManageAllData"));
-
     options.AddPolicy("UserOnlyAccess", policy => policy.RequireClaim("Permission", "HasUserID"));
 });
 
-builder.Services.AddSingleton<IAuthorizationHandler, UserOnlyAccessHandler>();
-
+//Adds Loggins
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-
 var app = builder.Build();
 
+//------------
+//CORS CONFIG
+//-----------
 string corsOrigin = string.Empty;
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
     corsOrigin = "http://localhost:4200";
-    //MOVE INTO DEV TO FIX DOUBLE HEADRS IN PROD
-    app.UseCors(option =>
-    option.WithOrigins(corsOrigin)
-    .AllowAnyHeader()
-    .AllowCredentials()
-    .AllowAnyMethod()
-    );
 }
 else
 {
@@ -193,6 +184,6 @@ app.MapHub<DataHub>("/hub").RequireCors(option =>
      .WithHeaders("x-requested-with", "x-signalr-user-agent", "content-type", "authorization")
     .AllowCredentials()
     .AllowAnyMethod()
-    );//ADD CORS HERE
+    );//SignalR Specific CORS Config
 
 app.Run();

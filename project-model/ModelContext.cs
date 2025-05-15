@@ -12,16 +12,18 @@ namespace project_model;
 
 public class ModelContext : IdentityDbContext<ProjectUser>
 {
-    public ModelContext() { }
+    //DI
     public ModelContext(DbContextOptions<ModelContext> options) : base(options) { }
-
+    //Reference to Entry Table
     public DbSet<Entry> Entries { get; set; }
+    //Reference to Value Table
     public DbSet<Values> SubmittedValues { get; set; }
+    //Reference to User Origin Table
     public DbSet<UserOrigin> UserOrigin { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        //optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=project_user;Database=submissions");
+        //Exit if already configured
         if (optionsBuilder.IsConfigured)
         {
             return;
@@ -30,14 +32,13 @@ public class ModelContext : IdentityDbContext<ProjectUser>
         //Load ENV
         DotNetEnv.Env.Load();
         var _connectionString = Environment.GetEnvironmentVariable("ConnectionStrings_DefaultConnection");
+        //Verify ENV files are not empty
         if (string.IsNullOrEmpty(_connectionString))
         {
             throw new Exception("Connection String Not Found in .env file");
         }
 
-/*        IConfigurationBuilder builder = new ConfigurationBuilder().AddEnvironmentVariables();
-        IConfigurationRoot configuration = builder.Build();*/
-
+        //User connection string for PostgreSql Connection
         optionsBuilder.UseNpgsql(_connectionString);
     }
 
@@ -45,6 +46,7 @@ public class ModelContext : IdentityDbContext<ProjectUser>
     {
         base.OnModelCreating(modelBuilder);
 
+        //Configure Entry Entity
         modelBuilder.Entity<Entry>(entity =>
         {
              entity.Property(e => e.ID)
@@ -52,13 +54,14 @@ public class ModelContext : IdentityDbContext<ProjectUser>
 
         });
 
+        //Configure Value Entity
         modelBuilder.Entity<Values>(entity =>
         {
             entity.HasOne(e => e.Entry) //Parent Entity
             .WithMany(p => p.SubmittedValues) //One to Many
             .HasForeignKey(v => v.EntryOrigin) //Explicitly states FK
             .HasPrincipalKey(e => e.Origin) //Use origin for FK even though its not the PK of entry
-            .OnDelete(DeleteBehavior.Cascade) //Maybe not cascade? Decide Later
+            .OnDelete(DeleteBehavior.Cascade) //Cascade on Delete
             .HasConstraintName("FK_Entry_Submission");
 
             entity.Property(e => e.SubmissionID)
@@ -75,6 +78,7 @@ public class ModelContext : IdentityDbContext<ProjectUser>
 
         });
 
+        //Configure User Origin Entity
         modelBuilder.Entity<UserOrigin>(entity =>
         {
             entity.HasKey(uo => new { uo.UserId, uo.EntryOrigin });
