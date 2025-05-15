@@ -255,7 +255,7 @@ namespace project_server.Controllers
 
         //This manually links an OriginID with a UserID
         [HttpPost("SetUserOriginID/{originID}")]
-        public async Task<IActionResult> SetUserOriginID(string originID)
+        public async Task<ActionResult> SetUserOriginID(string originID)
         {
             //Get User ID
             var userName = User?.Identity?.Name;
@@ -274,6 +274,25 @@ namespace project_server.Controllers
                     return Ok("User has existing origin.");
                 }
 
+                //--------------------------------------------
+                //This ensures that a newly registered user with
+                //no existing entry can make submissions
+                //-----------------------------------------------
+                var existingEntry = await _context.Entries
+                    .Include(e => e.SubmittedValues)
+                    .FirstOrDefaultAsync(e => e.Origin == originID);
+                //If it doesn't
+                if (existingEntry == null)
+                {
+                    //Generate a blank entry
+                    var newEntry = new Entry
+                    {
+                        Origin = originID,
+                        SubmittedValues = new List<Values>()
+                    };
+                    _context.Entries.Add(newEntry);
+                }
+
                 //If link doesn't exist
                 UserOrigin originUserLink = new()
                 {
@@ -284,7 +303,7 @@ namespace project_server.Controllers
                 _context.UserOrigin.Add(originUserLink);
                 await _context.SaveChangesAsync();
 
-                return Ok("User Origin Link Added");
+                return Ok( new { message = "User Origin Link Added" });
             }
 
             return BadRequest("User Not Found.");
