@@ -284,11 +284,11 @@ namespace project_server.Controllers
                 var values =  new Dtos.ValuesDTO
                 {
                     RateStars = (decimal)(random.NextDouble() * (3 - 0.1) + 0.1),
-                    FrequencyPlanets = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    FrequencyPlanets = (decimal)((random.NextDouble() * (100 - 1) + 1) / 100),
                     NearEarth = (decimal)(random.NextDouble() * (5 - 0.1) + 0.1),
-                    FractionLife = (decimal)(random.NextDouble() * (100 - 1) + 1),
-                    FractionIntelligence = (decimal)(random.NextDouble() * (100 - 1) + 1),
-                    FractionCommunication = (decimal)(random.NextDouble() * (100 - 1) + 1),
+                    FractionLife = (decimal)((random.NextDouble() * (100 - 1) + 1) / 100),
+                    FractionIntelligence = (decimal)((random.NextDouble() * (100 - 1) + 1) / 100),
+                    FractionCommunication = (decimal)((random.NextDouble() * (100 - 1) + 1) / 100),
                     Length = (long)random.NextInt64(1, 10000000000),
                     EntryOrigin = originID,
                 };
