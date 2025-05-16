@@ -151,6 +151,13 @@ builder.Logging.AddConsole();
 
 var app = builder.Build();
 
+//Apply mirgations on deploy
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ModelContext>();
+    db.Database.Migrate();
+}
+
 //------------
 //CORS CONFIG
 //-----------
