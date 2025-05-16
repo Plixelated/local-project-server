@@ -12,6 +12,7 @@ namespace project_model;
 
 public class ModelContext : IdentityDbContext<ProjectUser>
 {
+    public ModelContext() { }
     //DI
     public ModelContext(DbContextOptions<ModelContext> options) : base(options) { }
     //Reference to Entry Table
@@ -89,9 +90,9 @@ public class ModelContext : IdentityDbContext<ProjectUser>
             .OnDelete(DeleteBehavior.Cascade); //Cascades Delete so if user is deleted so is the link
 
             entity.HasOne(uo => uo.Entry) //One
-            .WithOne(e => e.UserOrigin) //To One
-            .HasForeignKey<UserOrigin>(uo => uo.EntryOrigin) //Explicitly define FK
-            .HasPrincipalKey<Entry>(e => e.Origin) //Use origin for FK even though its not the PK of entry
+            .WithMany(e => e.UserOrigin) //To Many
+            .HasForeignKey(uo => uo.EntryOrigin) //Explicitly define FK
+            .HasPrincipalKey(e => e.Origin) //Use origin for FK even though its not the PK of entry
             .OnDelete(DeleteBehavior.Cascade); //Cascades Delete so if entry is deleted so is the Link
         });
     }

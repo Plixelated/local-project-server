@@ -31,5 +31,5 @@ public partial class Entry
     //Link for FK
     [InverseProperty("Entry")]
     public virtual ICollection<Values> SubmittedValues { get; set; } = new List<Values>(); //Use ICollection for Lists
-    public UserOrigin UserOrigin { get; set; } //Link for FK
+    public ICollection<UserOrigin> UserOrigin { get; set; } //Link for FK
 }

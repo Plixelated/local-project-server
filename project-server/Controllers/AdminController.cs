@@ -108,7 +108,7 @@ namespace project_server.Controllers
             if (!userRole)
                 await roleManager.CreateAsync(new IdentityRole("User"));
 
-            //Add User role to each user by default
+            //Add User role to each new user by default
             await userManager.AddToRoleAsync(user, "User");
 
             //Find the newly registered user
