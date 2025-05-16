@@ -165,7 +165,7 @@ namespace project_server.Controllers
                 }
             }
 
-            return Ok("Claims Added to Admin Role");
+            return Ok(new { message = "Claims Added to Admin Role" });
         }
 
         //Seed All Claims for Researcher Accounts
@@ -200,7 +200,7 @@ namespace project_server.Controllers
                 }
             };
 
-            return Ok("Claims Added to Researcher Role");
+            return Ok(new { message = "Claims Added to Researcher Role" });
         }
 
         //Seed All Claims for User Accounts
@@ -227,7 +227,7 @@ namespace project_server.Controllers
                     return BadRequest(res.Errors);
             }
 
-            return Ok("Claims Added to User Role");
+            return Ok(new { message = "Claims Added to User Role" });
         }
 
         //-------------------------------------------------------
